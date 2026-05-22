@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <!-- link rel="stylesheet" href="//cdn.bytedance.com/npm/docsify@4/lib/themes/vue.css" -->  
+  <link rel="stylesheet" href="vue.css">
+  <style>
+  .content {
+    padding-top: 60px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 300px;
+    transition: left .25s ease;
+    overflow: scroll;
+}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- Docsify v4  jsd.onmicrosoft.cn   https://www.jsdelivr.com/github   jsd.cdn.zzko.cn -->
+  <script src="//cdn.bootcdn.net/ajax/libs/docsify/4.13.0/docsify.min.js" data-load-sidebar="_sidebar.md"></script>
+  <script src="//cdn.bootcdn.net/ajax/libs/docsify/4.13.0/"></script>
+
+  <script>
+  window.$docsify = {
+    name: '我的网站',
+    repo: false,
+    loadSidebar: true,  // 可以保留 true，我们后面手动隐藏
+    auto2top: true,
+
+    plugins: [
+      function (hook, vm) {
+      // 定义哪些路径要隐藏 sidebar
+      const HIDE_SIDEBAR = ['/company-road', '/about', '/resume'];  // 修改成你自己的路径
+
+        // 在每次页面切换后执行
+          // 获取当前页面的路径（docsify 中通过 vm.route.path 获取）
+      const currentPath = vm.route.path;
+
+      // 关键：判断当前页面是否在需要隐藏边栏的列表中
+      if (HIDE_SIDEBAR.includes(currentPath)) {
+	      // 使用 MutationObserver 等待 .sidebar 元素出现
+            const observer = new MutationObserver(function (mutations) {
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            const navbar = document.querySelector('.navbar'); // 可选：也隐藏导航
+
+            if (sidebar) {
+              sidebar.style.display = 'none !important';
+              sidebar.style.visibility = 'hidden';
+            }
+
+            if (content) {
+              content.style.marginLeft = '0';
+              content.style.width = '100%';
+            }
+
+            // 可选：隐藏顶部导航
+            // if (navbar) navbar.style.display = 'none';
+
+            // 隐藏后停止观察
+            observer.disconnect();
+          });
+
+          // 开始观察 body，等待 .sidebar 加载
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+
+          // 额外保险：1秒后再次检查
+          setTimeout(() => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+              sidebar.remove(); // 直接移除
+            }
+          }, 1000);
+	}
+        });
+      }
+    ]
+  };
+</script>
+
+</body>
+</html>
