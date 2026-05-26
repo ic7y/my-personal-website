@@ -14,6 +14,7 @@
           </button>
           <ul v-show="openSubmenus.courses" class="submenu">
             <li><a href="/docs#/company-road" class="submenu-link">互联网公司职场之路</a></li>
+            <li><a href="/docs#/bigdata-analysis" class="submenu-link">大数据技术及应用</a></li>
             <li><a href="/docs/" class="submenu-link">大数据分析项目实践</a></li>
             <li><a href="/docs#/software" class="submenu-link">软件工程</a></li>
             <li><a href="/docs#/c++" class="submenu-link">面向对象程序设计</a></li>
