@@ -25,6 +25,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       meta: [
+        // 确保移动端正确缩放
         { name: 'viewport', content: 'width=device-width, initial-scale=1' }
       ]
     }

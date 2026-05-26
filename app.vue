@@ -1,49 +1,29 @@
 <template>
-  <div class="app-layout">
-    <!-- Mobile header (hamburger) -->
-    <header class="mobile-header">
-      <button class="hamburger" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
+  <div class="min-h-screen flex">
+    <!-- 移动顶部栏（仅小屏显示） -->
+    <header class="w-full md:hidden flex items-center justify-between p-3 bg-white shadow-sm">
+      <button aria-label="Toggle menu" @click="mobileOpen = !mobileOpen" class="p-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
       </button>
-      <div class="mobile-title">我的站点</div>
+      <div class="text-lg font-medium">网站标题</div>
+      <div style="width:36px"></div>
     </header>
 
+    <!-- 传入 mobileOpen 并监听 close 事件 -->
     <AppSidebar :mobile-open="mobileOpen" @close="mobileOpen = false" />
 
-    <main class="main-content" :class="{ 'with-overlay-padding': mobileOpen }">
+    <main class="flex-1">
       <NuxtPage />
     </main>
   </div>
 </template>
 
 <script setup>
-const route = useRoute()
 import { ref } from 'vue'
-
-// 控制移动端侧边栏开关
+import AppSidebar from '~/components/AppSidebar.vue'
 const mobileOpen = ref(false)
-
-// Docsify 路径列表（请根据实际情况修改）
-const DOCSIFY_PATHS = ['/docs']
-if (process.client) {
-  const updateBodyClass = () => {
-    const isDocsify = DOCSIFY_PATHS.some(path => route.path.startsWith(path))
-    if (isDocsify) {
-      document.body.classList.remove('main-site-background')
-    } else {
-      document.body.classList.add('main-site-background')
-    }
-  }
-
-  updateBodyClass()
-
-  watch(
-    () => route.path,
-    () => updateBodyClass()
-  )
-}
 </script>
 
 <style>
