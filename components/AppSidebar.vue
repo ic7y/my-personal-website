@@ -1,5 +1,7 @@
 <template>
-  <nav class="main-sidebar">
+  <div>
+    <div v-if="mobileOpen" class="sidebar-overlay" @click="$emit('close')"></div>
+    <nav :class="['main-sidebar', { open: mobileOpen }]">
     <ul class="sidebar-menu">
 
       <!-- 课程（可展开） -->
@@ -43,10 +45,16 @@
       </li>
     </ul>
   </nav>
+
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, toRef } from 'vue'
+const props = defineProps({
+  mobileOpen: { type: Boolean, default: false }
+})
+const emit = defineEmits(['close'])
 
 // 控制哪些子菜单展开
 const openSubmenus = reactive({
@@ -58,6 +66,9 @@ const openSubmenus = reactive({
 const toggleSubmenu = (key) => {
   openSubmenus[key] = !openSubmenus[key]
 }
+
+// expose mobileOpen as reactive ref
+const mobileOpen = toRef(props, 'mobileOpen')
 </script>
 
 <style scoped>
@@ -71,6 +82,7 @@ const toggleSubmenu = (key) => {
   border-right: 1px solid #e0e0e0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+  z-index: 60;
 }
 
 .sidebar-menu {
@@ -159,7 +171,26 @@ const toggleSubmenu = (key) => {
 /* 响应式（可选） */
 @media (max-width: 768px) {
   .main-sidebar {
-    width: 200px;
+    width: 80%;
+    max-width: 320px;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+    height: 100vh;
+  }
+  .main-sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 50;
+  }
+  /* 减小桌面样式在移动端的间距 */
+  .menu-toggle,
+  .menu-link {
+    padding: 12px 16px;
+    font-size: 15px;
   }
 }
 </style>

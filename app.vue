@@ -1,7 +1,18 @@
 <template>
   <div class="app-layout">
-    <AppSidebar />
-    <main class="main-content">
+    <!-- Mobile header (hamburger) -->
+    <header class="mobile-header">
+      <button class="hamburger" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+      <div class="mobile-title">我的站点</div>
+    </header>
+
+    <AppSidebar :mobile-open="mobileOpen" @close="mobileOpen = false" />
+
+    <main class="main-content" :class="{ 'with-overlay-padding': mobileOpen }">
       <NuxtPage />
     </main>
   </div>
@@ -9,10 +20,13 @@
 
 <script setup>
 const route = useRoute()
+import { ref } from 'vue'
+
+// 控制移动端侧边栏开关
+const mobileOpen = ref(false)
 
 // Docsify 路径列表（请根据实际情况修改）
 const DOCSIFY_PATHS = ['/docs']
-// 仅在客户端执行
 if (process.client) {
   const updateBodyClass = () => {
     const isDocsify = DOCSIFY_PATHS.some(path => route.path.startsWith(path))
@@ -23,10 +37,8 @@ if (process.client) {
     }
   }
 
-  // 初始执行
   updateBodyClass()
 
-  // 监听路由变化（Nuxt 3 中 route 是响应式的）
   watch(
     () => route.path,
     () => updateBodyClass()
@@ -54,12 +66,54 @@ html, body {
   min-height: 100vh;
 }
 
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: white;
+  align-items: center;
+  padding: 0 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  z-index: 30;
+}
+
+.hamburger {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+}
+.hamburger-line {
+  display: block;
+  height: 2px;
+  background: #333;
+  border-radius: 2px;
+}
+.mobile-title {
+  margin-left: 12px;
+  font-weight: 600;
+}
+
 .main-content {
   flex: 1;
   padding: 2rem;
   margin-left: 220px; /* 确保内容区从侧边栏右侧开始 */
   max-width: calc(100% - 220px); /* 根据侧边栏宽度调整 */
   box-sizing: border-box;
+}
+
+/* 当移动端侧边栏打开时，避免页面内容与顶部 header 重叠 */
+.with-overlay-padding {
+  padding-top: 64px;
 }
 
 /* 移除 body 上的背景，改用 class 控制 */
@@ -73,6 +127,18 @@ body {
   background: radial-gradient(circle at 10% 20%, #f0f5ff 0%, #e6f0ff 90%) !important;
   background-attachment: fixed !important;
   min-height: 100vh;
+}
+
+/* 响应式：小屏幕时隐藏侧边栏，显示移动头部 */
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+  .main-content {
+    margin-left: 0;
+    max-width: 100%;
+    padding: 1rem;
+  }
 }
 
 </style>

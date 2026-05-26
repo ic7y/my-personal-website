@@ -21,6 +21,15 @@ export default defineNuxtConfig({
     port: 3000
   },
 
+  // 全局应用头部 meta（移动端适配）
+  app: {
+    head: {
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ]
+    }
+  },
+
   compatibilityDate: '2025-10-07'
 })
 
