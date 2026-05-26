@@ -11,7 +11,7 @@
 
     <AppSidebar :mobile-open="mobileOpen" @close="mobileOpen = false" />
 
-    <main class="main-content" :class="{ 'with-overlay-padding': mobileOpen }">
+    <main class="main-content">
       <NuxtPage />
     </main>
   </div>
@@ -67,28 +67,30 @@ html, body {
   height: 56px;
   background: #ffffff;
   align-items: center;
-  padding: 0 14px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
-  z-index: 40;
+  justify-content: flex-start;
+  padding: 0 16px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+  z-index: 50;
 }
 
 .hamburger {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 6px;
   cursor: pointer;
 }
 
 .hamburger-line {
   width: 100%;
   height: 2px;
-  background: #333;
+  background: #111827;
   border-radius: 2px;
 }
 
@@ -96,6 +98,7 @@ html, body {
   margin-left: 12px;
   font-weight: 600;
   font-size: 1rem;
+  color: #111827;
 }
 
 .main-content {
@@ -106,17 +109,18 @@ html, body {
   min-height: 100vh;
 }
 
-.with-overlay-padding {
-  padding-top: 70px;
-}
-
 @media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
   .mobile-header {
     display: flex;
   }
+
   .main-content {
     margin-left: 0;
-    padding: 1rem;
+    padding: 80px 1rem 1rem;
   }
 }
 </style>
