@@ -1,20 +1,30 @@
 <template>
-  <div class="min-h-screen">
+  <div class="app-layout">
+    <header class="mobile-header">
+      <button class="hamburger" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+      <div class="mobile-title">个人主页</div>
+    </header>
+
     <AppSidebar :mobile-open="mobileOpen" @close="mobileOpen = false" />
-    <main class="flex-1 md:ml-60">
+
+    <main class="main-content" :class="{ 'with-overlay-padding': mobileOpen }">
       <NuxtPage />
     </main>
   </div>
 </template>
 
 <script setup>
-const route = useRoute()
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import AppSidebar from '~/components/AppSidebar.vue'
 
-// 控制移动端侧边栏开关
 const mobileOpen = ref(false)
+const route = useRoute()
 
-// Docsify 路径列表（请根据实际情况修改）
 const DOCSIFY_PATHS = ['/docs']
 if (process.client) {
   const updateBodyClass = () => {
@@ -36,14 +46,7 @@ if (process.client) {
 </script>
 
 <style>
-/* 定义主站背景样式（请替换为您实际的 404 背景）*/
 @import '~/assets/css/tailwind.css';
-body.main-site-background {
-  /* background-color: #e6f7ee;  浅绿色背景 */
-  background: radial-gradient(circle at 10% 20%, #f0f5ff 0%, #e6f7ee 90%) !important;
-  background-attachment: fixed !important;
-}
-
 
 html, body {
   height: 100%;
@@ -62,11 +65,11 @@ html, body {
   left: 0;
   right: 0;
   height: 56px;
-  background: white;
+  background: #ffffff;
   align-items: center;
-  padding: 0 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-  z-index: 30;
+  padding: 0 14px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  z-index: 40;
 }
 
 .hamburger {
@@ -75,59 +78,45 @@ html, body {
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   background: transparent;
   border: none;
-  padding: 4px;
+  padding: 0;
   cursor: pointer;
 }
+
 .hamburger-line {
-  display: block;
+  width: 100%;
   height: 2px;
   background: #333;
   border-radius: 2px;
 }
+
 .mobile-title {
   margin-left: 12px;
   font-weight: 600;
+  font-size: 1rem;
 }
 
 .main-content {
   flex: 1;
   padding: 2rem;
-  margin-left: 220px; /* 确保内容区从侧边栏右侧开始 */
-  max-width: calc(100% - 220px); /* 根据侧边栏宽度调整 */
+  margin-left: 240px;
   box-sizing: border-box;
-}
-
-/* 当移动端侧边栏打开时，避免页面内容与顶部 header 重叠 */
-.with-overlay-padding {
-  padding-top: 64px;
-}
-
-/* 移除 body 上的背景，改用 class 控制 */
-body {
-  margin: 0;
-  background: transparent !important;
-}
-
-/* 主站背景样式（从原 404 页面复制过来）*/
-.with-main-bg {
-  background: radial-gradient(circle at 10% 20%, #f0f5ff 0%, #e6f0ff 90%) !important;
-  background-attachment: fixed !important;
   min-height: 100vh;
 }
 
-/* 响应式：小屏幕时隐藏侧边栏，显示移动头部 */
+.with-overlay-padding {
+  padding-top: 70px;
+}
+
 @media (max-width: 768px) {
   .mobile-header {
     display: flex;
   }
   .main-content {
     margin-left: 0;
-    max-width: 100%;
     padding: 1rem;
   }
 }
-
 </style>
