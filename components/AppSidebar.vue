@@ -13,12 +13,12 @@
             <span class="arrow">▶</span>
           </button>
           <ul v-show="openSubmenus.courses" class="submenu">
-            <li><a href="/docs#/company-road" class="submenu-link">互联网公司职场之路</a></li>
-            <li><a href="/docs#/bigdata-analysis" class="submenu-link">大数据技术及应用</a></li>
-            <li><a href="/docs/" class="submenu-link">大数据分析项目实践</a></li>
-            <li><a href="/docs#/software" class="submenu-link">软件工程</a></li>
-            <li><a href="/docs#/c++" class="submenu-link">面向对象程序设计</a></li>
-            <li><a href="/docs#/competitions" class="submenu-link">比赛</a></li>
+            <li><NuxtLink to="/docs/company-road" class="submenu-link">互联网公司职场之路</NuxtLink></li>
+            <li><NuxtLink to="/docs/bigdata-apply" class="submenu-link">大数据技术及应用</NuxtLink></li>
+            <li><NuxtLink to="/docs/bigdata-project" class="submenu-link">大数据分析项目实践</NuxtLink></li>
+            <li><NuxtLink to="/docs/software-data-engineering" class="submenu-link">软件工程</NuxtLink></li>
+            <li><NuxtLink to="/docs/c++" class="submenu-link">面向对象程序设计</NuxtLink></li>
+            <li><NuxtLink to="/docs/competitions" class="submenu-link">比赛</NuxtLink></li>
           </ul>
         </li>
 
@@ -69,15 +69,15 @@ const emitClose = () => emit('close')
 
 <style scoped>
 .main-sidebar {
-  width: 240px;
-  background: #f8f9fa;
+  width: 260px;
+  background: #ecfdf5;
   height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #bbf7d0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+  box-shadow: 2px 0 14px rgba(16, 185, 129, 0.08);
   z-index: 60;
 }
 
@@ -111,8 +111,8 @@ const emitClose = () => emit('close')
 
 .menu-toggle:hover,
 .menu-link:hover {
-  background-color: #e6f7ee;
-  color: #2a9d8f;
+  background-color: #d1fae5;
+  color: #166534;
   box-shadow: none;
 }
 
@@ -127,17 +127,27 @@ const emitClose = () => emit('close')
 
 .submenu-link {
   display: block;
-  padding: 12px 20px 12px 40px;
+  padding: 12px 20px 12px 28px;
   color: #555;
   text-decoration: none;
   font-weight: 400;
   transition: all 0.2s;
-  border-radius: 0 30px 30px 0;
+  border-radius: 0 28px 28px 0;
+}
+.submenu-link:hover {
+  color: #166534 !important;
+  background: #dcfce7 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
-.submenu-link:hover {
-  color: #42b983 !important;
-  background: transparent !important;
+.menu-toggle.active .arrow {
+  color: #166534;
+}
+
+.menu-link.active {
+  color: #166534 !important;
+  background: #d1fae5 !important;
   box-shadow: none !important;
   border-radius: 0 !important;
 }

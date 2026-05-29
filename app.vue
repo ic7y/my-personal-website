@@ -103,8 +103,8 @@ html, body {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
-  margin-left: 240px;
+  padding: 1.5rem;
+  margin-left: 260px;
   box-sizing: border-box;
   min-height: 100vh;
 }

@@ -2,8 +2,8 @@
 
 * [Home](README.md)
 * [回到主页](goto-home.md)
-<!-- * [面向对象程序设计](c++.md) -->
-<!-- * [软件设计与工程](sp.md)  -->
+* [面向对象程序设计](c++.md)
+* [软件设计与工程](software.md)
 * [hdfs常用命令](hdfs-cmd.md)
 * [sbt配置及构建](sbt.md)
 * [实验1：linux安装与使用](sbt.md)

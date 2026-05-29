@@ -27,10 +27,10 @@ B. 被观察者可以通知观察者进行更新
 C. 观察者可以改变被观察者的状态，再由被观察者通知所有观察者依据被观察者的状态进行更新   
 D. 观察者模式支持广播通信。
 9. 下面数据流图中要输出C的话，A和B是________关系。 
-<img src="./docs/software-pics/df-and.png" >
+<img src="./software-pics/df-and.png" >
 A. 与	   B. 或    C. 异或    	D. 没有关系
 10. 在下面的类关系图中，表达的是______关系。
-<img src="./docs/software-pics/class-comp.png" >
+<img src="./software-pics/class-comp.png" >
 A.聚合;  B. 合成;    C. 泛化;    D. 关联;
 
 11. 以下不属于软件生命周期的是______。
@@ -69,11 +69,11 @@ C. 继承一个类的行为到另一个类       D. 限制对象的访问权限
 26. 以下哪个关键字用于创建一个类的新实例？_______。 
 A. new   B. this     C. class     D. extends
 27. 下面数据流图中，输出A和B是________关系。 
-<img src="./docs/software-pics/df-nor.png" >
+<img src="./software-pics/df-nor.png" >
 A. 与	   B. 或    C. 异或    	D. 没有关系
 
 29. 在下面的类关系图中，表达的是______关系。
-<img src="./docs/software-pics/class-comp2.png" >
+<img src="./software-pics/class-comp2.png" >
 
 A. 聚合;  B. 合成;    C. 泛化;    D. 关联;
 
@@ -92,16 +92,16 @@ A. 控制流    B. 信息流    C. 数据流    D. 信号流
 
 35. 在下面的类关系图中，表达的是______关系。
 
-<img src="./docs/software-pics/class-agg.png" >
+<img src="./software-pics/class-agg.png" >
 A. 聚合;  B. 合成;    C. 泛化;    D. 关联;
 
 36.以下对象图画的正确的是____________。
 
-<img src="./docs/software-pics/obj-uml.png" >
+<img src="./software-pics/obj-uml.png" >
 
 37.以下类图画的正确的是____________。
 
-<img src="./docs/software-pics/class-uml.png" >
+<img src="./software-pics/class-uml.png" >
 
 38. 状态迁移图不包括以下______________。
 A.对象的状态                     B. 外部激励的事件
