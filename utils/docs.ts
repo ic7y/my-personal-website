@@ -35,7 +35,7 @@ export const docsCourses: CourseItem[] = [
   {
     key: 'bigdata-project',
     title: '大数据分析项目实践',
-    description: '按实验组织的实践内容，每个实验对应一个 Markdown 文档。',
+    description: '按实验组织的实践内容。',
     docs: [
       { key: 'sbt', title: 'sbt配置', file: 'bigdata-project/sbt.md' },
       { key: 'hdfs-cmd', title: '实验1：hdfs常用命令', file: 'bigdata-project/hdfs-cmd.md' },

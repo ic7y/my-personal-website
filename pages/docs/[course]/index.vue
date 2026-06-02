@@ -17,7 +17,7 @@
     <section class="docs-content">
       <div class="docs-intro">
         <h1>{{ course.title }}</h1>
-        <p>请从左侧选择一个文档。每个文档都是一个独立的 Markdown 文件。</p>
+        <p>请从左侧选择一个文档。</p>
       </div>
     </section>
   </div>
