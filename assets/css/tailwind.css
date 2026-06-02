@@ -2,3 +2,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Global variables for layout */
+:root {
+	--main-sidebar-width: 260px;
+}
+
+@media (max-width: 768px) {
+	:root {
+		--main-sidebar-width: 0;
+	}
+}

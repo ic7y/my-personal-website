@@ -92,6 +92,22 @@ const normalizeDocsUrls = (markdown = '') => {
 }
 
 onMounted(async () => {
+  // Inject high-priority heading styles at runtime to override other global rules
+  if (typeof window !== 'undefined') {
+    const existing = document.getElementById('doc-heading-overrides')
+    if (!existing) {
+      const s = document.createElement('style')
+      s.id = 'doc-heading-overrides'
+      s.innerHTML = `
+        .doc-body :is(h1,h2,h3,h4,h5,h6) {
+          font-size: initial !important;
+          font-weight: 700 !important;
+        }
+      `
+      document.head.appendChild(s)
+    }
+  }
+
   const res = await $fetch(`/docs/${doc.file}`)
   const source = typeof res === 'string' ? res : String(res)
   rawMarkdown.value = normalizeDocsUrls(source)
@@ -105,14 +121,14 @@ const htmlContent = computed(() => {
 })
 </script>
 
-<style scoped>
+<style>
 .docs-page-layout {
   display: grid;
   grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
   gap: 1rem;
   max-width: 1180px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 2rem;
+  margin: 0 0.75rem 1rem;
+  padding: 1.5rem 0.75rem 2rem;
 }
 
 .docs-sidebar {
@@ -192,6 +208,18 @@ const htmlContent = computed(() => {
   color: #4b5563;
 }
 
+.doc-body ol {
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+  list-style-position: outside;
+  list-style-type: decimal;
+}
+
+.doc-body ol li {
+  display: list-item;
+  margin-bottom: 0.75rem;
+}
+
 .doc-body img {
   max-width: 100%;
   height: auto;
@@ -207,12 +235,62 @@ const htmlContent = computed(() => {
   margin-top: 1.5rem;
 }
 
+.doc-body h1,
+.doc-body h2,
+.doc-body h3,
+.doc-body h4,
+.doc-body h5,
+.doc-body h6 {
+  margin-top: 1.5rem;
+}
+
+.doc-body h1 {
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.6rem;
+}
+
+.doc-body h2 {
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem;
+}
+
+.doc-body h3 {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.4rem;
+}
+
+.doc-body h4 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.35rem;
+}
+
+.doc-body h5 {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.3rem;
+}
+
+.doc-body h6 {
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.25rem;
+}
+
 .doc-body pre {
   background: #111827;
   color: #fff;
   padding: 1rem;
   border-radius: 12px;
   overflow-x: auto;
+}
+
+.doc-body pre code {
+  background: transparent;
+  padding: 0;
 }
 
 .doc-body code {

@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { reactive, toRef } from 'vue'
+import { reactive, toRef, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 const props = defineProps({
   mobileOpen: { type: Boolean, default: false }
@@ -65,6 +65,44 @@ const toggleSubmenu = (key) => {
 }
 
 const emitClose = () => emit('close')
+
+let ro = null
+const updateSidebarWidth = () => {
+  if (typeof window === 'undefined') return
+  const mq = window.matchMedia('(max-width: 768px)')
+  if (mq.matches) {
+    document.documentElement.style.setProperty('--main-sidebar-width', '0px')
+    return
+  }
+  const el = document.querySelector('.main-sidebar')
+  if (!el) return
+  const w = Math.round(el.getBoundingClientRect().width) || 260
+  document.documentElement.style.setProperty('--main-sidebar-width', `${w}px`)
+}
+
+onMounted(() => {
+  // initial sync
+  nextTick(() => {
+    updateSidebarWidth()
+    // ResizeObserver to watch sidebar size changes
+    if (typeof window !== 'undefined' && window.ResizeObserver) {
+      ro = new ResizeObserver(() => updateSidebarWidth())
+      const el = document.querySelector('.main-sidebar')
+      if (el) ro.observe(el)
+    }
+    window.addEventListener('resize', updateSidebarWidth)
+  })
+})
+
+onBeforeUnmount(() => {
+  if (ro && ro.disconnect) ro.disconnect()
+  window.removeEventListener('resize', updateSidebarWidth)
+})
+
+watch(mobileOpen, () => {
+  // sidebar may slide in/out on mobile; recalc after DOM updates
+  nextTick(updateSidebarWidth)
+})
 </script>
 
 <style scoped>

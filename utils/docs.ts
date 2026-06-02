@@ -18,7 +18,7 @@ export const docsCourses: CourseItem[] = [
     title: '互联网公司职场之路',
     description: '浏览企业职业发展、求职经验和职场规划文档。',
     docs: [
-      { key: 'company-road', title: '互联网公司职场之路', file: 'company-road.md' }
+      { key: 'company-road', title: '互联网公司职场之路', file: 'company-road/company-road.md' }
     ]
   },
   {
@@ -61,9 +61,9 @@ export const docsCourses: CourseItem[] = [
   {
     key: 'software-data-engineering',
     title: '软件/数据工程',
-    description: '软件工程习题',
+    description: '软件/数据工程习题',
     docs: [
-      { key: 'software', title: '软件工程', file: 'software-data-engineering/software.md' }
+      { key: 'software', title: '软件/数据工程', file: 'software-data-engineering/software.md' }
     ]
   },
   {

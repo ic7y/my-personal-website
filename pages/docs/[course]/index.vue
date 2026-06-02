@@ -39,16 +39,17 @@ if (!course) {
 <style scoped>
 .docs-page-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 280px) minmax(0, 1fr);
-  gap: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: 1rem;
+  max-width: 1180px;
+  margin: 0 0.75rem 1rem;
+  padding: 1.5rem 0.75rem 2rem;
 }
 
 .docs-sidebar {
   padding: 1.5rem;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  border-radius: 24px;
   background: #ffffff;
 }
 
