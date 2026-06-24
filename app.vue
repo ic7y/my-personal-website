@@ -14,6 +14,7 @@
     <main class="main-content">
       <NuxtPage />
     </main>
+    <footer v-if="route.path === '/'" class="site-footer"><a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">陕ICP备2025062258号-1</a></footer>
   </div>
 </template>
 
@@ -107,6 +108,7 @@ html, body {
   margin-left: 260px;
   box-sizing: border-box;
   min-height: 100vh;
+  padding-bottom: 72px;
 }
 
 @media (max-width: 768px) {
@@ -121,6 +123,28 @@ html, body {
   .main-content {
     margin-left: 0;
     padding: 80px 1rem 1rem;
+  }
+}
+
+.site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  color: #374151;
+  font-size: 14px;
+  z-index: 40;
+}
+
+@media (max-width: 768px) {
+  .site-footer {
+    left: 0;
   }
 }
 </style>
