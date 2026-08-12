@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="card">
+    <view style="font-size:36rpx;font-weight:600;">管理员设置</view>
+    <view style="font-size:28rpx;color:#8a8f99;margin-top:8rpx;">桌号 {{table ? table.tableNumber : tableId}}</view>
+  </view>
+
+  <view wx:if="!isAdmin" class="card">
+    <view style="font-size:28rpx;color:#8a8f99;">将使用当前微信登录用户身份判断是否为管理员。</view>
+    <button type="primary" style="margin-top:16rpx;" bindtap="loginAdmin">确认当前微信用户身份</button>
+    <view wx:if="message" style="margin-top:12rpx;color:#dc2626;">{{message}}</view>
+  </view>
+
+  <view wx:else>
+    <view class="card">
+      <button type="default" bindtap="scanQrCode">扫码切换桌号</button>
+    </view>
+
+    <view wx:if="loading" class="card">正在加载…</view>
+    <view wx:else>
+      <view class="card">
+        <view style="font-size:28rpx;color:#8a8f99;">开始时间</view>
+        <picker mode="dateTime" value="{{start}}" bindchange="bindStartChange">
+          <view style="margin-top:12rpx;padding:16rpx;border:1px solid #dfe4ea;border-radius:16rpx;">{{start || '请选择开始时间'}}</view>
+        </picker>
+      </view>
+
+      <view class="card">
+        <view style="font-size:28rpx;color:#8a8f99;">结束时间</view>
+        <picker mode="dateTime" value="{{end}}" bindchange="bindEndChange">
+          <view style="margin-top:12rpx;padding:16rpx;border:1px solid #dfe4ea;border-radius:16rpx;">{{end || '请选择结束时间'}}</view>
+        </picker>
+      </view>
+
+      <view class="card">
+        <button type="primary" bindtap="saveSchedule">保存设置</button>
+        <view wx:if="message" style="margin-top:12rpx;color:#16a34a;">{{message}}</view>
+      </view>
+
+    </view>
+  </view>
+</view>

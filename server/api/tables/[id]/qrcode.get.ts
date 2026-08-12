@@ -9,13 +9,13 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 404)
     return { ok: false, message: 'table not found' }
   }
-  const miniPath = `pages/table/index?tableId=${table.id}`
+  const payload = `pages/index/index?tableId=${encodeURIComponent(table.tableNumber || String(table.id))}&role=user`
   // Generate PNG data URL
-  const pngDataUrl = await QRCode.toDataURL(miniPath, { type: 'image/png' })
+  const pngDataUrl = await QRCode.toDataURL(payload, { type: 'image/png' })
   return {
     ok: true,
     data: {
-      path: miniPath,
+      path: payload,
       tableNumber: table.tableNumber,
       infoUrl: `/api/tables/${table.id}`,
       pngDataUrl,

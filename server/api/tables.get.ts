@@ -1,9 +1,19 @@
 import { getAllTables } from '../utils/tables'
-import { requireAdmin } from '../utils/auth'
+import { getCurrentUserRole, getHeader } from '../utils/auth'
 
 export default defineEventHandler(async (event) => {
-  console.log('[api] GET /api/tables', event.node?.req?.method || event.req?.method, event.node?.req?.url || event.req?.url)
-  if (!requireAdmin(event)) return { ok: false, message: 'unauthorized' }
+  const method = event.node?.req?.method || event.req?.method
+  const headers = {
+    'x-openid': event.node?.req?.headers['x-openid'] || event.req?.headers['x-openid'],
+    'x-unionid': event.node?.req?.headers['x-unionid'] || event.req?.headers['x-unionid'],
+  }
+  console.log('[api] GET /api/tables request', { method, headers })
+  // Allow all users to view the tables list
   const tables = await getAllTables()
-  return { ok: true, data: tables }
+  const role = getCurrentUserRole(event)
+  const openid = getHeader(event, 'x-openid') || ''
+  const unionid = getHeader(event, 'x-unionid') || ''
+  const result = { ok: true, data: tables, role, openid, unionid }
+  console.log('[api] GET /api/tables response', result)
+  return result
 })

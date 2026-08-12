@@ -1,0 +1,43 @@
+container {
+  padding: 20rpx;
+}
+.card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 两列网格容器 */
+.tables-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* 每个桌台卡片 */
+.table-item {
+  width: calc(50% - 12rpx);   /* 两列，间隔 24rpx */
+  margin-bottom: 20rpx;
+  background: #f8fafc;
+  border-radius: 16rpx;
+  padding: 16rpx 12rpx;
+  box-sizing: border-box;
+}
+
+/* 内部文字样式（可选） */
+.table-number {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #0f172a;
+}
+.table-status {
+  font-size: 24rpx;
+  color: #2563eb;
+  margin-top: 4rpx;
+}
+.table-meta {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-top: 4rpx;
+}

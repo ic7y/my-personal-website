@@ -1,4 +1,5 @@
 import { getTableById } from '../../utils/tables'
+import { getCurrentUserRole, getHeader } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   console.log('[api] GET /api/tables/:id', event.node?.req?.method || event.req?.method, event.context.params)
@@ -8,5 +9,8 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 404)
     return { ok: false, message: 'table not found' }
   }
-  return { ok: true, data: table }
+  const role = getCurrentUserRole(event)
+  const openid = getHeader(event, 'x-openid') || ''
+  const unionid = getHeader(event, 'x-unionid') || ''
+  return { ok: true, data: table, role, openid, unionid }
 })

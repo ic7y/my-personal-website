@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 404)
     return { ok: false, message: 'table not found' }
   }
-  const miniPath = `pages/table/index?tableId=${table.id}`
-  const buffer = await QRCode.toBuffer(miniPath, { type: 'png', width: 300 })
+  const payload = `pages/index/index?tableId=${encodeURIComponent(table.tableNumber || String(table.id))}&role=user`
+  const buffer = await QRCode.toBuffer(payload, { type: 'png', width: 300 })
   setResponseHeader(event, 'Content-Type', 'image/png')
   return buffer
 })

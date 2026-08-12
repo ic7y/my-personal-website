@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="card">
+    <view style="font-size:36rpx;font-weight:600;">历史订单查询</view>
+    <view style="margin-top:16rpx;display:flex;flex-direction:column;gap:12rpx;">
+      <view>
+        <view style="font-size:28rpx;color:#8a8f99;margin-bottom:8rpx;">桌号</view>
+        <input value="{{filterTableNumber}}" bindinput="onFilterTableNumberChange" placeholder="输入桌号查询" style="width:100%;padding:12rpx 14rpx;border:1px solid #e2e8f0;border-radius:14rpx;font-size:26rpx;" />
+      </view>
+      <view>
+        <view style="font-size:28rpx;color:#8a8f99;margin-bottom:8rpx;">创建日期</view>
+        <input value="{{filterDate}}" bindinput="onFilterDateChange" placeholder="格式 YYYY-MM-DD" style="width:100%;padding:12rpx 14rpx;border:1px solid #e2e8f0;border-radius:14rpx;font-size:26rpx;" />
+      </view>
+      <button type="primary" bindtap="searchOrders" style="padding:12rpx 18rpx;border-radius:18rpx;font-size:28rpx;">查询</button>
+    </view>
+  </view>
+
+  
+<view class="card" style="padding:20rpx;">
+  <!-- 有订单时显示列表 -->
+  <block wx:if="{{orders.length}}">
+    <view 
+      wx:for="{{orders}}" 
+      wx:key="id" 
+      style="margin-bottom:16rpx; border-bottom:1px solid #e5e7eb; padding-bottom:16rpx;"
+    >
+      <view style="font-size:28rpx;font-weight:600;">订单 #{{item.id}}</view>
+      <view style="margin-top:8rpx;color:#475569;font-size:24rpx;">桌号：{{item.tableNumber}}</view>
+      <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">创建时间：{{item.createdAt}}</view>
+      <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">开始时间：{{item.start || '未设置'}}</view>
+      <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">结束时间：{{item.end || '未设置'}}</view>
+      <view style="margin-top:6rpx;color:#2563eb;font-size:24rpx;">订单状态：{{item.statusLabel}}</view>
+    </view>
+  </block>
+
+  <!-- 无订单时显示提示 -->
+  <view wx:elif="{{loaded && !orders.length}}" style="color:#475569;font-size:28rpx;text-align:center;">
+    暂无订单
+  </view>
+
+  <!-- 如果还需要加载中或错误，也可以放在这里 -->
+</view>
+
+</view>
