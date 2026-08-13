@@ -2,10 +2,13 @@ export function getHeader(event: any, name: string): string | undefined {
   return (event.node?.req?.headers[name] || event.req?.headers[name]) as string | undefined
 }
 
+
+const adminOpenIds=['wx_0f1iPh200VnmSW1IbC2009PrIl0iPh2I', 'admin002']
+
 function isAdminOpenId(openid?: string): boolean {
   const normalized = String(openid || '').trim()
   console.log('[auth] isAdminOpenId', { openid, normalized })
-  return normalized.toLowerCase().startsWith('admin')
+  return adminOpenIds.includes(normalized) || normalized.toLowerCase().startsWith('admin')
 }
 
 export function isAdmin(event: any) {
