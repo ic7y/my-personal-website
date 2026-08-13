@@ -7,7 +7,6 @@ App({
     currentUnionId: '',
     currentUserId: '',
     userInfo: null,
-    adminOpenIds: ['admin001', 'admin002'],
     adminToken: 'changeme'
   },
 
@@ -15,6 +14,11 @@ App({
     // 启动时先计算接口基地址
     this.globalData.baseUrl = this.getBaseUrl()
     console.log('当前环境 baseUrl:', this.globalData.baseUrl)
+
+    const { platform } = wx.getSystemInfoSync()
+    if (platform === 'devtools') {
+      this.globalData.role = 'admin'
+    }
 
     // 你原本的缓存恢复逻辑保持不变
     const cachedOpenId = wx.getStorageSync('currentOpenId') 
@@ -47,6 +51,16 @@ App({
     }
   },
   async ensureLoginOnEntry() {
+    const { platform } = wx.getSystemInfoSync()
+    if (platform === 'devtools') {
+      const devOpenId = 'admin_devtools'
+      this.globalData.role = 'admin'
+      this.globalData.currentOpenId = devOpenId
+      this.globalData.currentUserId = devOpenId
+      wx.setStorageSync('currentOpenId', devOpenId)
+      return { openid: devOpenId, unionid: '', isLoggedIn: true, role: 'admin' }
+    }
+
     const cachedOpenId = this.globalData.currentOpenId || wx.getStorageSync('currentOpenId') 
     const cachedUnionId = this.globalData.currentUnionId || wx.getStorageSync('currentUnionId') 
 

@@ -13,11 +13,13 @@
           <text wx:else>桌台使用查询</text>
         </view>
       </view>
-      <view style="display:flex;align-items:center;gap:10rpx;flex-wrap:wrap;">
-        <button wx:if="role === 'admin'" type="primary" bindtap="openAddModal" style="padding:10rpx 18rpx;font-size:24rpx;border-radius:18rpx;">新增桌台</button>
-        <button wx:if="role === 'admin'" type="default" bindtap="goOrderHistory" style="padding:10rpx 18rpx;font-size:24rpx;border-radius:18rpx;">历史订单查询</button>
-        <view wx:if="role === 'admin'" style="background:#e8f3ff;color:#1c7cd6;padding:8rpx 16rpx;border-radius:999rpx;font-size:24rpx;">管理员</view>
-        <view wx:else style="background:#ecfdf3;color:#16a34a;padding:8rpx 16rpx;border-radius:999rpx;font-size:24rpx;">普通用户</view>
+      <view wx:if="role === 'admin'" style="display:flex;align-items:center;gap:8rpx;flex-wrap:nowrap;">
+        <button type="primary" bindtap="openAddModal" style="min-width:0;line-height:1.4;padding:8rpx 12rpx;font-size:22rpx;border-radius:14rpx;display:inline-flex;align-items:center;justify-content:center;">新增桌台</button>
+        <button type="default" bindtap="goOrderHistory" style="min-width:0;line-height:1.4;padding:8rpx 12rpx;font-size:22rpx;border-radius:14rpx;display:inline-flex;align-items:center;justify-content:center;">历史订单</button>
+        <view style="background:#e8f3ff;color:#1c7cd6;padding:6rpx 12rpx;border-radius:999rpx;font-size:22rpx;white-space:nowrap;">管理员</view>
+      </view>
+      <view wx:else style="display:flex;align-items:center;gap:8rpx;flex-wrap:nowrap;">
+        <view style="background:#ecfdf3;color:#16a34a;padding:6rpx 12rpx;border-radius:999rpx;font-size:22rpx;white-space:nowrap;">普通用户</view>
       </view>
     </view>
     <view style="margin-top:12rpx;color:#475569;font-size:24rpx;">
