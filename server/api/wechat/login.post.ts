@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${encodeURIComponent(appid)}&secret=${encodeURIComponent(secret)}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`
+    console.log('[api] POST /api/wechat/login request', { url })
     const res = await $fetch<{ openid?: string; unionid?: string; errcode?: number; errmsg?: string }>(url)
 
     if (res?.errcode) {

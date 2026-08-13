@@ -1,3 +1,8 @@
+// nuxt.config.ts 顶部加上这一行
+import { defineNuxtConfig } from 'nuxt/config'
+
+
+
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',

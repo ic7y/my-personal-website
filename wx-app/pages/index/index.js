@@ -35,39 +35,43 @@ Page({
   async onLoad(options) {
     console.log('index onLoad start', options)
     const tableId = options.tableId || ''
-    const openId = options.userId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-    const unionId = options.unionId || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
+    const cachedOpenId = options.userId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
+    const cachedUnionId = options.unionId || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
 
-    console.log('index onLoad identity', { openId, unionId })
+    const loginState = cachedOpenId || cachedUnionId
+      ? { openid: cachedOpenId, unionid: cachedUnionId, isLoggedIn: true }
+      : await app.ensureLoginOnEntry()
+
+    const openId = loginState.openid || cachedOpenId
+    const unionId = loginState.unionid || cachedUnionId
+
+    console.log('index onLoad identity', { openId, unionId, isLoggedIn: loginState.isLoggedIn })
     this.setData({ tableId, userId: openId, openId, unionId, selectedTableId: '' })
     app.globalData.tableId = tableId
     app.globalData.currentOpenId = openId
     app.globalData.currentUnionId = unionId
     app.globalData.currentUserId = openId
 
+    if (!openId && !unionId) {
+      this.setData({ role: 'guest' })
+      return
+    }
+
     // 仅onLoad做初始化请求
     await this.loadTables()
 
-    if (openId || unionId) {
-      const role = await app.verifyUserRole(openId, unionId);
-      this.setData({ role });
-      app.globalData.role = role;
+    const role = await app.verifyUserRole(openId, unionId)
+    this.setData({ role })
+    app.globalData.role = role
 
-      if (role === 'admin') {
-        // 管理员：如果通过外部携带 tableId 访问，可跳转管理员页面
-        if (tableId) {
-          wx.reLaunch({ url: `/pages/admin/admin?tableId=${tableId}&...` });
-          return;
-        }
-      }
-      console.log('onLoad 最终 role:', this.data.role);
-      console.log('onLoad tables:', this.data.tables);
-      console.log('onLoad table:', this.data.tableId);
-    } else {
-      // 未登录，跳转登录或显示提示
-      this.setData({ role: 'guest' });
+    if (role === 'admin' && tableId) {
+      wx.reLaunch({ url: `/pages/admin/admin?tableId=${tableId}&userId=${encodeURIComponent(openId)}&unionId=${encodeURIComponent(unionId)}` })
+      return
     }
 
+    console.log('onLoad 最终 role:', this.data.role)
+    console.log('onLoad tables:', this.data.tables)
+    console.log('onLoad table:', this.data.tableId)
   },
 
   onShow() {

@@ -1,7 +1,6 @@
 App({
   globalData: {
-    // 使用本机本地地址调试，避免真机预览时 localhost 解析到手机自身
-    baseUrl: 'http://127.0.0.1:3000',
+    baseUrl: '', // 启动时自动赋值，不写死
     role: 'user',
     tableId: '',
     currentOpenId: '',
@@ -11,10 +10,15 @@ App({
     adminOpenIds: ['admin001', 'admin002'],
     adminToken: 'changeme'
   },
+
   onLaunch() {
-    console.log('微信小程序启动')
-    const cachedOpenId = wx.getStorageSync('currentOpenId') || ''
-    const cachedUnionId = wx.getStorageSync('currentUnionId') || ''
+    // 启动时先计算接口基地址
+    this.globalData.baseUrl = this.getBaseUrl()
+    console.log('当前环境 baseUrl:', this.globalData.baseUrl)
+
+    // 你原本的缓存恢复逻辑保持不变
+    const cachedOpenId = wx.getStorageSync('currentOpenId') 
+    const cachedUnionId = wx.getStorageSync('currentUnionId') 
     if (cachedOpenId) {
       this.globalData.currentOpenId = cachedOpenId
       this.globalData.currentUserId = cachedOpenId
@@ -23,9 +27,66 @@ App({
       this.globalData.currentUnionId = cachedUnionId
     }
   },
+
+  // 核心：环境判断方法
+  getBaseUrl() {
+    // 1. 先判断发布版本：体验版、正式版 强制用线上域名
+    const envVersion = __wxConfig.envVersion
+    if (envVersion === 'release' || envVersion === 'trial') {
+      return 'https://windx.cloud'
+    }
+
+    // 2. 开发版本：判断是电脑模拟器还是手机真机
+    const { platform } = wx.getSystemInfoSync()
+    if (platform === 'devtools') {
+      // 电脑开发者工具：用本地地址
+      return 'http://localhost:8080'
+    } else {
+      // 手机真机（包括真机调试）：自动切换线上域名
+      return 'https://windx.cloud'
+    }
+  },
+  async ensureLoginOnEntry() {
+    const cachedOpenId = this.globalData.currentOpenId || wx.getStorageSync('currentOpenId') 
+    const cachedUnionId = this.globalData.currentUnionId || wx.getStorageSync('currentUnionId') 
+
+    if (cachedOpenId || cachedUnionId) {
+      return { openid: cachedOpenId, unionid: cachedUnionId, isLoggedIn: true }
+    }
+
+    return new Promise((resolve) => {
+      wx.showModal({
+        title: '微信登录',
+        content: '为识别当前微信用户身份并区分管理员，需要获取 openid/unionid。是否立即授权登录？',
+        confirmText: '授权登录',
+        cancelText: '暂不登录',
+        success: async (res) => {
+          if (!res.confirm) {
+            resolve({ openid: '', unionid: '', isLoggedIn: false })
+            return
+          }
+
+          const result = await this.loginWechatUser()
+          if (!result.openid) {
+            wx.showToast({ title: '登录失败：未获取 openid', icon: 'none' })
+            resolve({ openid: '', unionid: '', isLoggedIn: false })
+            return
+          }
+
+          const role = await this.verifyUserRole(result.openid, result.unionid)
+          this.globalData.role = role
+          wx.showToast({ title: role === 'admin' ? '管理员身份已确认' : '登录成功', icon: 'success' })
+          resolve({ openid: result.openid, unionid: result.unionid, isLoggedIn: true, role })
+        },
+        fail: () => {
+          resolve({ openid: '', unionid: '', isLoggedIn: false })
+        }
+      })
+    })
+  },
   isAdminUserId(userId) {
     const normalized = String(userId || '').trim()
-    return this.globalData.adminOpenIds.includes(normalized)
+    return this.globalData.adminOpenIds.includes(normalized) || normalized.toLowerCase().startsWith('admin')
   },
   async verifyUserRole(openid, unionid) {
     try {
