@@ -8,4 +8,6 @@ rm -rf node_modules/.cache
 npm run build
 
 echo "正在部署（启动或重启 PM2）..."
+pm2 delete my-nuxt-site
+# pm2 start ecosystem.config.cjs
 pm2 startOrRestart ecosystem.config.cjs
