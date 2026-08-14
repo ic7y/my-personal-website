@@ -77,7 +77,11 @@ Page({
 
     await this.loadTables()
 
-    const role = app.globalData.role || await app.verifyUserRole(openid, unionid)
+    // 明确身份（devtools 管理员 / 游客）直接使用；否则向服务端校验。
+    // 注意：手机端 globalData.role 默认是 'user'（真值），不能用 || 短路，否则永远不会校验，识别不了管理员
+    const role = (app.globalData.role === 'admin' || app.globalData.role === 'guest')
+      ? app.globalData.role
+      : await app.verifyUserRole(openid, unionid)
     this.setData({ role })
     app.globalData.role = role
 
