@@ -1,5 +1,6 @@
 import { createTable } from '../utils/tables'
-import { getHeader, requireAdmin } from '../utils/auth'
+import { requireAdmin } from '../utils/auth'
+import { getHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const method = event.node?.req?.method || event.req?.method
@@ -16,9 +17,7 @@ export default defineEventHandler(async (event) => {
   }
   const openid = getHeader(event, 'x-openid') || 'unknown'
   const table = await createTable({
-    tableNumber: body.tableNumber,
-    start: body.start ?? null,
-    end: body.end ?? null,
+    tableNumber: body.tableNumber
   }, openid)
   const result = { ok: true, data: table }
   console.log('[api] POST /api/tables response', result)

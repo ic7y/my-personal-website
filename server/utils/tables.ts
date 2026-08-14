@@ -194,14 +194,14 @@ export async function updateTable(id: string | number, payload: TableUpdatePaylo
       changes.push(`create order start=${payload.start} status=2`)
     }
   } else if (currentOrder.status === 2) {
-    // 进行中状态只能结束当前订单，结束时间设置为当前时间
-    if (payload.end) {
-      const now = formatDateTimeForDb(new Date())
-      await updateOrderById(currentOrder.id, {
-        end: now,
-        status: 1,
-      }, openid)
-      changes.push(`end order id=${currentOrder.id} end=${now} status=1`)
+    // 进行中订单：允许直接修改开始/结束时间
+    // （结束订单时前端传 end=当前时间，读取时自动归入已结束状态）
+    const updates: { start?: string | null; end?: string | null } = {}
+    if (payload.start !== undefined) updates.start = payload.start
+    if (payload.end !== undefined) updates.end = payload.end
+    if (Object.keys(updates).length) {
+      await updateOrderById(currentOrder.id, updates, openid)
+      changes.push(`update order id=${currentOrder.id} start=${payload.start ?? '-'} end=${payload.end ?? '-'}`)
     }
   }
 

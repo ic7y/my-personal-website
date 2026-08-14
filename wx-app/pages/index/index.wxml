@@ -3,30 +3,36 @@
   说明: 根据登录身份(`role`)显示所有桌台(管理员)或单个桌台(普通用户或通过二维码进入)
   调试信息: 顶部会输出 openId/unionId/role/loading/tables.length 便于排查数据加载问题
 -->
+<!-- 首屏启动页：logo + 拾取手作 可爱动画，1s 后消失 -->
+<view wx:if="{{splashVisible}}" class="splash">
+  <image class="splash-logo" src="/pages/index/logo.jpg" mode="aspectFit" />
+  <view class="splash-title">
+    <text wx:for="{{splashChars}}" wx:key="*this" class="splash-char" style="animation-delay: {{index * 0.12}}s;">{{item}}</text>
+  </view>
+</view>
+
 <view class="container">
   <view class="card">
     <view style="display:flex;justify-content:space-between;align-items:center;gap:12rpx;flex-wrap:wrap;">
       <view>
-        <view style="font-size:28rpx;color:#8a8f99;">桌台计时小程序</view>
-        <view style="font-size:40rpx;font-weight:600;">
-          <text wx:if="role === 'admin'">所有桌台使用情况</text>
-          <text wx:else>桌台使用查询</text>
-        </view>
-      </view>
-      <view wx:if="role === 'admin'" style="display:flex;align-items:center;gap:8rpx;flex-wrap:nowrap;">
-        <button type="primary" bindtap="openAddModal" style="min-width:0;line-height:1.4;padding:8rpx 12rpx;font-size:22rpx;border-radius:14rpx;display:inline-flex;align-items:center;justify-content:center;">新增桌台</button>
-        <button type="default" bindtap="goOrderHistory" style="min-width:0;line-height:1.4;padding:8rpx 12rpx;font-size:22rpx;border-radius:14rpx;display:inline-flex;align-items:center;justify-content:center;">历史订单</button>
-        <view style="background:#e8f3ff;color:#1c7cd6;padding:6rpx 12rpx;border-radius:999rpx;font-size:22rpx;white-space:nowrap;">管理员</view>
-      </view>
-      <view wx:else style="display:flex;align-items:center;gap:8rpx;flex-wrap:nowrap;">
-        <view style="background:#ecfdf3;color:#16a34a;padding:6rpx 12rpx;border-radius:999rpx;font-size:22rpx;white-space:nowrap;">普通用户</view>
+        <view style="font-size:40rpx;font-weight:600;">桌台使用查询</view>
       </view>
     </view>
-    <view style="margin-top:12rpx;color:#475569;font-size:24rpx;">
-      <view>openid：{{openId || '未获取'}}</view>
-      <view>unionid：{{unionId || '未获取'}}</view>
-      <view style="margin-top:6rpx;color:#2563eb;">登录结果：{{loginResult || '未登录'}}</view>
-      <view style="margin-top:6rpx;color:#64748b;">调试：role={{role}} loading={{loading}} tables={{tables.length}}</view>
+    <!-- 管理员操作按钮：统一风格、紧凑、等距、单行 -->
+    <view wx:if="{{role === 'admin'}}" style="display:flex;align-items:center;gap:16rpx;margin-top:20rpx;">
+      <button class="action-btn action-btn--ghost" bindtap="openAddModal">新增桌台</button>
+      <button class="action-btn action-btn--ghost" bindtap="goOrderHistory">历史订单</button>
+      <button class="action-btn action-btn--ghost" bindtap="switchToUserMode">普通用户</button>
+    </view>
+    <!-- 调试信息面板 -->
+    <view style="margin-top:16rpx;padding:16rpx 20rpx;background:#f8fafc;border-radius:16rpx;font-size:20rpx;color:#64748b;line-height:1.7;word-break:break-all;">
+      <view>openid：{{openid}}</view>
+      <view>unionid：{{unionid}}</view>
+      <view>昵称：{{nickname}}｜role：{{role}}｜platform：{{platform}}</view>
+    </view>
+    <!-- 扫码进入：该桌台订单信息聚焦标题 -->
+    <view wx:if="{{isTableEntry && table}}" style="margin-top:8rpx;padding:16rpx 20rpx;background:#fff7ed;border:1rpx solid #ffedd5;border-radius:16rpx;">
+      <view style="font-size:28rpx;font-weight:600;color:#f97316;">桌号 {{table.tableNumber}} 的订单信息</view>
     </view>
   </view>
 
@@ -60,7 +66,7 @@
                 size="mini" 
                 bindtap="showQrCode" 
                 data-table-id="{{item.id}}" 
-                style="padding:4rpx 12rpx; font-size:22rpx; border-radius:16rpx; line-height:1.4;">
+                style="padding:4rpx 12rpx; font-size:22rpx; border-radius:16rpx; line-height:1.4; background:#fff1e0; color:#111827;">
                 二维码
               </button>
             </view>
@@ -78,12 +84,13 @@
               </view>
             </view>
 
-            <!-- 第四行：订单状态（点击触发状态修改） -->
-            <view style="margin-top:4rpx; display:flex; align-items:center; gap:10rpx; font-size:26rpx; color:{{item.currentOrderStatusCode === 1 ? '#dc2626' : '#2563eb'}};">
+            <!-- 第四行：订单状态（点击触发状态修改）+ 新订单按钮 -->
+            <view style="margin-top:4rpx; display:flex; align-items:center; gap:10rpx; font-size:26rpx; flex-wrap:wrap; color:{{item.currentOrderStatusCode === 1 ? '#dc2626' : '#2563eb'}};">
               <view bindtap="modifyOrderStatus" data-table-id="{{item.id}}" style="display:flex; align-items:center; gap:4rpx;">
                 <text>状态：</text>
                 <text>{{item.currentOrderStatus || '无订单'}}</text>
               </view>
+              <button wx:if="{{role === 'admin'}}" size="mini" bindtap="openNewOrder" data-table-id="{{item.id}}" data-table-number="{{item.tableNumber}}" style="margin:0;padding:2rpx 18rpx;font-size:22rpx;line-height:1.7;border-radius:12rpx;background:#fff1e0;color:#16a34a;">新订单</button>
             </view>
           </view>
         </view>

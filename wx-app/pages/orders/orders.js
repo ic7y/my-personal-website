@@ -45,14 +45,11 @@ Page({
         })
       })
       if (res.data && res.data.ok) {
-        // 按 tableNumber 排序，确保数字或字符串都能正确排序
+        // 按开始时间降序排列，开始时间为空的排最后
         const sorted = (res.data.data || []).slice().sort((a, b) => {
-          const ta = a.tableNumber
-          const tb = b.tableNumber
-          const na = Number(ta)
-          const nb = Number(tb)
-          if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb
-          return ('' + ta).localeCompare('' + tb, undefined, { numeric: true })
+          const ta = a.start ? new Date(a.start).getTime() : -Infinity
+          const tb = b.start ? new Date(b.start).getTime() : -Infinity
+          return tb - ta
         })
         this.setData({ orders: sorted, loaded: true })
       } else {

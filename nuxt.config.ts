@@ -26,6 +26,12 @@ export default defineNuxtConfig({
     port: 3000
   },
 
+  // 关闭 app manifest，避免 Nuxt 3.12 内置 manifest-route-rule 中间件被自动扫描+显式注册两次而告警
+  // （本站未使用 routeRules 客户端重定向，关闭无影响）
+  experimental: {
+    appManifest: false
+  },
+
   // 全局应用头部 meta（移动端适配）
   app: {
     head: {

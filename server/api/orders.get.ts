@@ -22,8 +22,9 @@ export default defineEventHandler(async (event) => {
       return true
     })
     .sort((a, b) => {
-      const ta = new Date(a.createdAt).getTime()
-      const tb = new Date(b.createdAt).getTime()
+      // 按开始时间降序，开始时间为空的排最后
+      const ta = a.start ? new Date(a.start).getTime() : -Infinity
+      const tb = b.start ? new Date(b.start).getTime() : -Infinity
       return tb - ta
     })
 

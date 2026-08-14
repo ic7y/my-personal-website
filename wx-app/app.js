@@ -1,11 +1,10 @@
 App({
   globalData: {
-    baseUrl: '', // 启动时自动赋值，不写死
+    baseUrl: '',
     role: 'user',
     tableId: '',
-    currentOpenId: '',
-    currentUnionId: '',
-    currentUserId: '',
+    openid: '',
+    unionid: '',
     userInfo: null,
     adminToken: 'changeme'
   },
@@ -20,15 +19,14 @@ App({
       this.globalData.role = 'admin'
     }
 
-    // 你原本的缓存恢复逻辑保持不变
-    const cachedOpenId = wx.getStorageSync('currentOpenId') 
-    const cachedUnionId = wx.getStorageSync('currentUnionId') 
+    // 恢复缓存的登录身份
+    const cachedOpenId = wx.getStorageSync('openid')
+    const cachedUnionId = wx.getStorageSync('unionid')
     if (cachedOpenId) {
-      this.globalData.currentOpenId = cachedOpenId
-      this.globalData.currentUserId = cachedOpenId
+      this.globalData.openid = cachedOpenId
     }
     if (cachedUnionId) {
-      this.globalData.currentUnionId = cachedUnionId
+      this.globalData.unionid = cachedUnionId
     }
   },
 
@@ -55,23 +53,24 @@ App({
     if (platform === 'devtools') {
       const devOpenId = 'admin_devtools'
       this.globalData.role = 'admin'
-      this.globalData.currentOpenId = devOpenId
-      this.globalData.currentUserId = devOpenId
-      wx.setStorageSync('currentOpenId', devOpenId)
+      this.globalData.openid = devOpenId
+      wx.setStorageSync('openid', devOpenId)
       return { openid: devOpenId, unionid: '', isLoggedIn: true, role: 'admin' }
     }
 
-    const cachedOpenId = this.globalData.currentOpenId || wx.getStorageSync('currentOpenId') 
-    const cachedUnionId = this.globalData.currentUnionId || wx.getStorageSync('currentUnionId') 
+    const cachedOpenId = this.globalData.openid || wx.getStorageSync('openid')
+    const cachedUnionId = this.globalData.unionid || wx.getStorageSync('unionid')
 
     if (cachedOpenId || cachedUnionId) {
+      this.globalData.openid = cachedOpenId
+      this.globalData.unionid = cachedUnionId
       return { openid: cachedOpenId, unionid: cachedUnionId, isLoggedIn: true }
     }
 
     return new Promise((resolve) => {
       wx.showModal({
         title: '微信登录',
-        content: '为识别当前微信用户身份并区分管理员，需要获取 openid/unionid。是否立即授权登录？',
+        content: '是否立即授权登录？',
         confirmText: '授权登录',
         cancelText: '暂不登录',
         success: async (res) => {
@@ -98,15 +97,11 @@ App({
       })
     })
   },
-  isAdminUserId(userId) {
-    const normalized = String(userId || '').trim()
-    return this.globalData.adminOpenIds.includes(normalized) || normalized.toLowerCase().startsWith('admin')
-  },
   async verifyUserRole(openid, unionid) {
     try {
       const headers = {
-        'x-openid': openid || this.globalData.currentOpenId,
-        'x-unionid': unionid || this.globalData.currentUnionId
+        'x-openid': openid || this.globalData.openid,
+        'x-unionid': unionid || this.globalData.unionid
       }
       const res = await new Promise((resolve, reject) => {
         wx.request({
@@ -172,11 +167,10 @@ App({
       }
 
       this.globalData.userInfo = userInfo
-      this.globalData.currentOpenId = openid
-      this.globalData.currentUnionId = unionid
-      this.globalData.currentUserId = openid
-      wx.setStorageSync('currentOpenId', openid)
-      if (unionid) wx.setStorageSync('currentUnionId', unionid)
+      this.globalData.openid = openid
+      this.globalData.unionid = unionid
+      wx.setStorageSync('openid', openid)
+      if (unionid) wx.setStorageSync('unionid', unionid)
       if (Object.keys(userInfo).length) wx.setStorageSync('userInfo', JSON.stringify(userInfo))
 
       return { openid, unionid }

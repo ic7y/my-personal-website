@@ -10,9 +10,15 @@ Page({
     tables: [],
     loading: false,
     role: 'user',
-    userId: '',
-    openId: '',
-    unionId: '',
+    platform: '',
+    openid: '',
+    unionid: '',
+    nickname: '',
+    userMode: false,
+    isTableEntry: false,
+    // 首屏启动页
+    splashVisible: true,
+    splashChars: ['拾', '取', '手', '作'],
     loginResult: '',
     selectedTableId: '',
     error: '',
@@ -34,41 +40,48 @@ Page({
 
   async onLoad(options) {
     console.log('index onLoad start', options)
-    const tableId = options.tableId || ''
-    const cachedOpenId = options.userId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-    const cachedUnionId = options.unionId || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
+    // 首屏启动页展示 1s 后隐藏
+    setTimeout(() => {
+      this.setData({ splashVisible: false })
+    }, 2000)
+    const platform = wx.getSystemInfoSync().platform
+    this.setData({ platform })
+    console.log('当前 platform:', platform, 'globalData.role:', app.globalData.role)
+    // 普通二维码用 tableId 参数；小程序码用 scene（形如 t=<tableId>）
+    let tableId = options.tableId || ''
+    if (!tableId && options.scene) {
+      const scene = decodeURIComponent(String(options.scene || ''))
+      const m = scene.match(/t=([^&]+)/)
+      if (m && m[1]) tableId = decodeURIComponent(m[1])
+    }
+    const cachedOpenId = options.userId || app.globalData.openid || wx.getStorageSync('openid') || ''
+    const cachedUnionId = options.unionId || app.globalData.unionid || wx.getStorageSync('unionid') || ''
 
     const loginState = cachedOpenId || cachedUnionId
       ? { openid: cachedOpenId, unionid: cachedUnionId, isLoggedIn: true }
       : await app.ensureLoginOnEntry()
 
-    const openId = loginState.openid || cachedOpenId
-    const unionId = loginState.unionid || cachedUnionId
+    const openid = loginState.openid || cachedOpenId
+    const unionid = loginState.unionid || cachedUnionId
 
-    console.log('index onLoad identity', { openId, unionId, isLoggedIn: loginState.isLoggedIn })
-    this.setData({ tableId, userId: openId, openId, unionId, selectedTableId: '' })
-    app.globalData.tableId = tableId
-    app.globalData.currentOpenId = openId
-    app.globalData.currentUnionId = unionId
-    app.globalData.currentUserId = openId
+    app.globalData.openid = openid
+    app.globalData.unionid = unionid
+    this.setData({ tableId, selectedTableId: '', isTableEntry: !!options.tableId })
+    this.refreshIdentity()
 
-    if (!openId && !unionId) {
+    if (!openid && !unionid) {
       this.setData({ role: 'guest' })
+      app.globalData.role = 'guest'
       return
     }
 
-    // 仅onLoad做初始化请求
     await this.loadTables()
 
-    const role = await app.verifyUserRole(openId, unionId)
+    const role = app.globalData.role || await app.verifyUserRole(openid, unionid)
     this.setData({ role })
     app.globalData.role = role
 
-    if (role === 'admin' && tableId) {
-      wx.reLaunch({ url: `/pages/admin/admin?tableId=${tableId}&userId=${encodeURIComponent(openId)}&unionId=${encodeURIComponent(unionId)}` })
-      return
-    }
-
+    // 管理员不再跳转独立 admin 页，直接在 index 页内完成管理操作
     console.log('onLoad 最终 role:', this.data.role)
     console.log('onLoad tables:', this.data.tables)
     console.log('onLoad table:', this.data.tableId)
@@ -79,6 +92,10 @@ Page({
     if (this.data.isFirstLoad) {
       this.setData({ isFirstLoad: false })
       return
+    }
+    // 从其他页面（如历史订单）返回：退出普通用户模式，恢复管理员身份
+    if (this.data.userMode) {
+      this.setData({ userMode: false })
     }
     // 非首次，正常刷新
     this.loadTables()
@@ -115,17 +132,15 @@ Page({
     }
     this.pageLoadLock = true
 
-    console.log('loadTables called', { currentOpenId: app.globalData.currentOpenId, currentUnionId: app.globalData.currentUnionId, role: app.globalData.role })
+    console.log('loadTables called', { openid: app.globalData.openid, unionid: app.globalData.unionid, role: app.globalData.role })
     this.setData({ loading: true, error: '' })
     try {
       const headers = {
-        'x-openid': app.globalData.currentOpenId,
-        'x-unionid': app.globalData.currentUnionId
+        'x-openid': app.globalData.openid,
+        'x-unionid': app.globalData.unionid
       }
-      const currentOpenId = app.globalData.currentOpenId || this.data.openId
-      const isDevAdmin = currentOpenId === 'admin001' || currentOpenId === 'admin002'
       const isLocalDev = app.globalData.baseUrl.includes('127.0.0.1') || app.globalData.baseUrl.includes('localhost')
-      if (isDevAdmin || isLocalDev) {
+      if (isLocalDev) {
         headers['x-admin-token'] = app.globalData.adminToken
       }
       console.log('loadTables request headers', headers)
@@ -150,16 +165,18 @@ Page({
               start: item.currentOrder?.start || null,
               end: item.currentOrder?.end || null,
               used: item.used || { formatted: '0分钟' },
-              currentOrderStatus: item.currentOrderStatus || '无订单'
+              currentOrderStatus: item.currentOrderStatus || '无订单',
+              currentOrderStatusCode: item.currentOrderStatusCode ?? 3
             }))
           ))
           console.log('loadTables set tables', tables)
 
           // 全部数据一次性平铺set，不要任何嵌套回调
-          const currentOpenId = app.globalData.currentOpenId || this.data.openId
-          const isAdminUser = app.isAdminUserId(currentOpenId) || app.isAdminUserId(app.globalData.currentUnionId)
           const isLocalDev = app.globalData.baseUrl.includes('127.0.0.1') || app.globalData.baseUrl.includes('localhost')
-          const roleToSet = tables.length && (this.data.role === 'admin' || app.globalData.role === 'admin' || isAdminUser || isLocalDev) ? 'admin' : this.data.role
+          // 真实身份：本地开发(devtools)强制管理员，否则用全局已判定身份
+          const trueRole = (app.globalData.role === 'admin' || isLocalDev) ? 'admin' : (app.globalData.role || 'user')
+          // 视图身份：普通用户模式下锁定为 user（不写入全局真实身份）
+          const viewRole = this.data.userMode ? 'user' : trueRole
 
           // 处理table匹配
           let matchTable = null
@@ -172,17 +189,16 @@ Page({
             matchTable = tables[0]
           }
 
+          // 扫码进入（带 tableId）：只展示该桌台的订单信息
+          const displayTables = this.data.isTableEntry && matchTable ? [matchTable] : tables
+
           // ========= 重点：所有数据一次性批量set，无嵌套 =========
           this.setData({
-            tables: tables,
-            role: roleToSet,
+            tables: displayTables,
+            role: viewRole,
             table: matchTable
           })
-
-          // 全局role只改global，不用放setData
-          if (roleToSet === 'admin') {
-            app.globalData.role = 'admin'
-          }
+          app.globalData.role = trueRole
         }
     } catch (e) {
       console.error('loadTables error', e)
@@ -195,44 +211,6 @@ Page({
       })
     }
   },
-
-async loadTables2() {
-  if (this.pageLoadLock) {
-    console.log('loadTables 正在请求中，拒绝重复调用')
-    return
-  }
-  this.pageLoadLock = true
-
-  console.log('loadTables called')
-  this.setData({ loading: true, error: '' })
-  try {
-    // 彻底屏蔽网络请求，手写纯净数组，无任何接口
-    const tables = [
-      {
-        id: 1,
-        tableNumber: "A1",
-        start: null,
-        end: null
-      }
-    ]
-    // 所有参数一次性赋值，无任何回调嵌套
-    this.setData({
-      tables: tables,
-      role: "admin"
-    })
-    console.log('onLoad 最终 role:', this.data.role);
-    console.log('onLoad tables:', this.data.tables);
-    console.log('onLoad table:', this.data.tableId);
-  } catch (e) {
-    console.error('loadTables error', e)
-    this.setData({ error: '网络错误' })
-  } finally {
-    this.pageLoadLock = false
-    this.setData({ loading: false }, () => {
-      console.log('setData回调，最终loading：', this.data.loading)
-    })
-  }
-},
 
 
   async loadTable() {
@@ -279,13 +257,11 @@ async loadTables2() {
   },
 
   async ensureUserIdentityThenScan() {
-    const currentUserId = this.data.openId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-    const currentUnionId = this.data.unionId || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
-    if (currentUserId) {
-      const role = await app.verifyUserRole(currentUserId, currentUnionId)
-      this.setData({ userId: currentUserId, openId: currentUserId, unionId: currentUnionId, role })
-      app.globalData.currentOpenId = currentUserId
-      app.globalData.currentUnionId = currentUnionId
+    const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
+    const unionid = app.globalData.unionid || wx.getStorageSync('unionid') || ''
+    if (openid) {
+      const role = await app.verifyUserRole(openid, unionid)
+      this.setData({ role })
       app.globalData.role = role
       this.scanQrCode()
       return
@@ -311,22 +287,21 @@ async loadTables2() {
     try {
       const result = await app.loginWechatUser()
       console.log('loginWithWechat result', result)
-      const openId = result?.openid || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-      const unionId = result?.unionid || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
-      if (!openId) {
+      const openid = result?.openid || app.globalData.openid || wx.getStorageSync('openid') || ''
+      const unionid = result?.unionid || app.globalData.unionid || wx.getStorageSync('unionid') || ''
+      if (!openid) {
         wx.showToast({ title: '登录失败：未获取 openid', icon: 'none' })
         this.setData({ loginResult: '登录失败：未获取 openid' })
         return false
       }
-      const role = await app.verifyUserRole(openId, unionId)
-      console.log('loginWithWechat role', { openId, unionId, role })
-      this.setData({ userId: openId, openId, unionId, role, loginResult: `登录成功: ${openId}` })
-      app.globalData.currentOpenId = openId
-      app.globalData.currentUnionId = unionId
-      app.globalData.currentUserId = openId
+      const role = await app.verifyUserRole(openid, unionid)
+      console.log('loginWithWechat role', { openid, unionid, role })
+      this.setData({ role, loginResult: `登录成功: ${openid}` })
+      app.globalData.openid = openid
+      app.globalData.unionid = unionid
       app.globalData.role = role
-      wx.setStorageSync('currentOpenId', openId)
-      wx.setStorageSync('currentUnionId', unionId)
+      wx.setStorageSync('openid', openid)
+      wx.setStorageSync('unionid', unionid)
       // 登录后刷新数据，加锁判断
       if (role === 'admin' && !this.pageLoadLock) {
         await this.loadTables()
@@ -343,19 +318,19 @@ async loadTables2() {
   async authorizeLogin() {
     console.log('authorizeLogin start')
     const success = await this.loginWithWechat()
-    const openId = app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-    const unionId = app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
+    const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
+    const unionid = app.globalData.unionid || wx.getStorageSync('unionid') || ''
     let role = app.globalData.role || this.data.role
     const message = success
-      ? `登录成功: ${openId || 'openid 未获取'} / ${unionId || 'unionid 未获取'}`
+      ? `登录成功: ${openid || 'openid 未获取'} / ${unionid || 'unionid 未获取'}`
       : '登录失败，请查看后台日志'
-    console.log('authorizeLogin result', { success, openId, unionId, role })
-    this.setData({ openId, unionId, role, loginResult: message })
+    console.log('authorizeLogin result', { success, openid, unionid, role })
+    this.setData({ role, loginResult: message })
     wx.showToast({ title: message, icon: success ? 'success' : 'none' })
 
     if (!success) return
 
-    const roleRefresh = await app.verifyUserRole(openId, unionId)
+    const roleRefresh = await app.verifyUserRole(openid, unionid)
     console.log('authorizeLogin roleRefresh', { roleRefresh })
     role = roleRefresh
     this.setData({ role })
@@ -367,7 +342,7 @@ async loadTables2() {
   },
 
   async scanQrCode() {
-    if (!this.data.openId) {
+    if (!app.globalData.openid && !wx.getStorageSync('openid')) {
       const loggedIn = await this.loginWithWechat()
       if (!loggedIn) return
     }
@@ -378,14 +353,8 @@ async loadTables2() {
         const tableId = this.extractTableId(res.result || '')
         if (tableId) {
           app.globalData.tableId = tableId
-          const currentUserId = this.data.userId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-          const currentUnionId = app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
-          const role = await app.verifyUserRole(currentUserId, currentUnionId)
-          if (role === 'admin') {
-            wx.reLaunch({ url: `/pages/admin/admin?tableId=${tableId}&userId=${encodeURIComponent(currentUserId)}&unionId=${encodeURIComponent(currentUnionId)}` })
-          } else {
-            wx.reLaunch({ url: `/pages/index/index?tableId=${tableId}&userId=${encodeURIComponent(currentUserId)}&unionId=${encodeURIComponent(currentUnionId)}` })
-          }
+          this.setData({ tableId })
+          await this.loadTables()
         } else {
           wx.showToast({ title: '未识别到桌号', icon: 'none' })
         }
@@ -396,25 +365,43 @@ async loadTables2() {
     })
   },
 
-  async goAdmin() {
-    const currentUserId = this.data.userId || app.globalData.currentOpenId || wx.getStorageSync('currentOpenId') || ''
-    const currentUnionId = this.data.unionId || app.globalData.currentUnionId || wx.getStorageSync('currentUnionId') || ''
-    const role = await app.verifyUserRole(currentUserId, currentUnionId)
-    if (role === 'admin') {
-      const tableIdToUse = this.data.selectedTableId || this.data.tableId || app.globalData.tableId || ''
-      wx.navigateTo({ url: `/pages/admin/admin?tableId=${encodeURIComponent(tableIdToUse)}&userId=${encodeURIComponent(currentUserId)}&unionId=${encodeURIComponent(currentUnionId)}` })
-      return
-    }
-    wx.showToast({ title: '当前微信用户不是管理员', icon: 'none' })
-  },
-
   goOrderHistory() {
     wx.navigateTo({ url: '/pages/orders/orders' })
+  },
+
+  // 切换到普通用户模式：锁定 userMode，隐藏管理员操作入口，并重新加载数据
+  // 注意：不修改 app.globalData.role（全局真实身份保持为 admin），仅切换本页视图
+  switchToUserMode() {
+    this.setData({ role: 'user', userMode: true })
+    this.loadTables()
+    wx.showToast({ title: '已切换到普通用户模式', icon: 'none' })
   },
 
   formatDate(value) {
     if (!value) return '未设置'
     return new Date(value).toLocaleString('zh-CN', { hour12: false })
+  },
+
+  // 从全局或缓存中读取昵称
+  getNickname() {
+    const userInfo = app.globalData.userInfo
+    if (userInfo && userInfo.nickName) return userInfo.nickName
+    try {
+      const cached = wx.getStorageSync('userInfo')
+      const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
+      return (parsed && parsed.nickName) || ''
+    } catch (e) {
+      return ''
+    }
+  },
+
+  // 刷新调试面板需要的身份信息
+  refreshIdentity() {
+    this.setData({
+      openid: app.globalData.openid || wx.getStorageSync('openid') || '',
+      unionid: app.globalData.unionid || wx.getStorageSync('unionid') || '',
+      nickname: this.getNickname()
+    })
   },
 
   formatUsed(value) {
@@ -455,11 +442,11 @@ async loadTables2() {
       return
     }
     const headers = {
-      'x-openid': app.globalData.currentOpenId,
-      'x-unionid': app.globalData.currentUnionId
+      'x-openid': app.globalData.openid,
+      'x-unionid': app.globalData.unionid
     }
-    const currentOpenId = app.globalData.currentOpenId || this.data.openId
-    const isDevAdmin = currentOpenId === 'admin001' || currentOpenId === 'admin002'
+    const openid = app.globalData.openid
+    const isDevAdmin = openid === 'admin001' || openid === 'admin002'
     const isLocalDev = app.globalData.baseUrl.includes('127.0.0.1') || app.globalData.baseUrl.includes('localhost')
     if (isDevAdmin || isLocalDev) {
       headers['x-admin-token'] = app.globalData.adminToken
@@ -512,13 +499,9 @@ async loadTables2() {
 
 // 时间修改弹窗
 openEditModal(e) {
-  // 1. 权限控制：非管理员直接拦截
+  // 1. 权限控制：非管理员直接拦截（普通用户模式静默返回，不出现提示）
+  // 注意：用视图身份 this.data.role 判断，普通用户模式下为 'user'
   if (this.data.role !== 'admin') {
-    wx.showToast({
-      title: '仅管理员可操作',
-      icon: 'none',
-      duration: 1500
-    });
     return;
   }
 
@@ -531,34 +514,31 @@ openEditModal(e) {
     return;
   }
 
-  const currentStatusCode = table.currentOrderStatusCode || 3;
-  if (currentStatusCode === 2) {
-    wx.showToast({
-      title: '进行中订单请直接结束，不允许修改开始/结束时间',
-      icon: 'none'
-    });
+  const currentStatusCode = table.currentOrderStatusCode ?? 3;
+  // 已结束订单不可修改时间
+  if (currentStatusCode === 1) {
+    wx.showToast({ title: '已结束订单不可修改时间', icon: 'none' });
     return;
   }
+  // 进行中/未开始/无订单均可修改开始、结束时间
 
   const now = this.getCurrentDateTime()
-  const defaultStart = currentStatusCode === 1 ? now : (table.start || now)
+  const defaultStart = table.start || now
+  // 进行中订单若已设置结束时间则预填
+  const defaultEnd = table.currentOrder?.end ? this.toPickerValue(table.currentOrder.end) : ''
 
   this.setData({
     editModalVisible: true,
     editTableId: tableId,
     editStart: defaultStart,
-    editEnd: ''
+    editEnd: defaultEnd
   });
 },
 
 // 订单状态修改
 modifyOrderStatus(e) {
+    // 权限控制：非管理员静默返回，不出现提示（用视图身份判断）
     if (this.data.role !== 'admin') {
-      wx.showToast({
-        title: '仅管理员可操作',
-        icon: 'none',
-        duration: 1500
-      });
       return;
     }
 
@@ -583,6 +563,68 @@ modifyOrderStatus(e) {
         console.log('取消选择', err)
       }
     })
+  },
+
+  // 新订单：仅已结束订单可开新单，确认后创建进行中订单（开始时间=当前时间）
+  openNewOrder(e) {
+    // 权限控制：仅管理员（普通用户模式静默返回）
+    if (this.data.role !== 'admin') {
+      return;
+    }
+    const tableId = e.currentTarget.dataset.tableId;
+    const tableNumber = e.currentTarget.dataset.tableNumber || '';
+    const table = this.data.tables.find(item => item.id === tableId);
+    if (!table) return;
+    const statusCode = table.currentOrderStatusCode ?? 3;
+    if (statusCode !== 1) {
+      wx.showToast({ title: '仅已结束订单可开新订单', icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: '新订单',
+      content: `为桌号「${tableNumber}」开新订单？开始时间将设为当前时间。`,
+      confirmText: '确定',
+      cancelText: '取消',
+      success: async (res) => {
+        if (!res.confirm) return;
+        await this.createNewOrder(table);
+      }
+    });
+  },
+
+  async createNewOrder(table) {
+    try {
+      const headers = {
+        'content-type': 'application/json',
+        'x-openid': app.globalData.openid,
+        'x-unionid': app.globalData.unionid
+      }
+      const openid = app.globalData.openid
+      const isDevAdmin = openid === 'admin001' || openid === 'admin002'
+      const isLocalDev = app.globalData.baseUrl.includes('127.0.0.1') || app.globalData.baseUrl.includes('localhost')
+      if (isDevAdmin || isLocalDev) {
+        headers['x-admin-token'] = app.globalData.adminToken
+      }
+      const res = await new Promise((resolve, reject) => {
+        wx.request({
+          url: `${app.globalData.baseUrl}/api/tables/${encodeURIComponent(table.id)}`,
+          method: 'PUT',
+          header: headers,
+          data: { start: new Date().toISOString() },
+          success: resolve,
+          fail: reject
+        })
+      })
+      if (res.data && res.data.ok) {
+        wx.showToast({ title: '新订单已创建', icon: 'success' });
+        await this.loadTables();
+      } else {
+        wx.showToast({ title: res.data?.message || '开单失败', icon: 'none' });
+      }
+    } catch (e) {
+      console.error('createNewOrder error', e);
+      wx.showToast({ title: '网络错误', icon: 'none' });
+    }
   },
 
 // 更新订单状态的接口调用（示例）
@@ -626,11 +668,11 @@ async updateOrderStatus(tableId, status) {
     try {
       const headers = {
         'content-type': 'application/json',
-        'x-openid': app.globalData.currentOpenId,
-        'x-unionid': app.globalData.currentUnionId
+        'x-openid': app.globalData.openid,
+        'x-unionid': app.globalData.unionid
       }
-      const currentOpenId = app.globalData.currentOpenId || this.data.openId
-      const isDevAdmin = currentOpenId === 'admin001' || currentOpenId === 'admin002'
+      const openid = app.globalData.openid
+      const isDevAdmin = openid === 'admin001' || openid === 'admin002'
       const isLocalDev = app.globalData.baseUrl.includes('127.0.0.1') || app.globalData.baseUrl.includes('localhost')
       if (isDevAdmin || isLocalDev) {
         headers['x-admin-token'] = app.globalData.adminToken

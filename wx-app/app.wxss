@@ -3,6 +3,17 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
 }
 
+/* 全局主按钮：浅橙色主题 */
+button[type="primary"] {
+  background-color: #ffa94d !important;
+  color: #ffffff !important;
+  border-radius: 14rpx;
+}
+
+button[type="primary"]::after {
+  border: none;
+}
+
 .container {
   padding: 24rpx;
 }

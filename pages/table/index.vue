@@ -183,10 +183,9 @@ async function modifyOrderStatus() {
 }
 
 onMounted(() => {
-  // determine openid from query or localStorage
+  // determine openid from query
   const qOpenid = (route.query.userId as string | undefined) || (route.query.openid as string | undefined) || ''
-  const cached = window.localStorage.getItem('currentOpenId') || ''
-  openid.value = qOpenid || cached || ''
+  openid.value = qOpenid || ''
 
   // ask server for role using x-openid header when available
   ;(async () => {

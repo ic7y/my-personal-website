@@ -10,6 +10,7 @@ type Order = {
   start: string | null
   end: string | null
   status: OrderStatus
+  usedTime: string
   createdAt: string
   updatedAt: string
 }
@@ -71,14 +72,43 @@ function computeOrderStatus(start?: string | null, end?: string | null): OrderSt
   return 3
 }
 
+function computeUsedMinutes(start?: string | null, end?: string | null) {
+  const startDate = parseOrderDate(start)
+  if (!startDate) return 0
+  const endDate = end ? parseOrderDate(end) : new Date()
+  if (!endDate) return 0
+  const diff = Math.max(0, endDate.getTime() - startDate.getTime())
+  return Math.floor(diff / 60000)
+}
+
+function formatUsedTime(start?: string | null, end?: string | null) {
+  const minutesTotal = computeUsedMinutes(start, end)
+  const hours = Math.floor(minutesTotal / 60)
+  const minutes = minutesTotal % 60
+  const parts: string[] = []
+  if (hours) parts.push(`${hours}小时`)
+  if (minutes || !hours) parts.push(`${minutes}分钟`)
+  return parts.join('') || '0分钟'
+}
+
 function normalizeOrderRow(row: any): Order {
+  const start = formatDateTime(row.start)
+  const end = formatDateTime(row.end)
+  const status = Number(row.status) as OrderStatus
+  // 已结束：end - start；进行中：当前时间 - start（实时）；其他：用数据库保存值
+  const usedTime = status === 1
+    ? formatUsedTime(start, end)
+    : status === 2
+      ? formatUsedTime(start, null)
+      : String(row.usedTime || formatUsedTime(start, end) || '0分钟')
   return {
     id: Number(row.id),
     tableId: Number(row.tableId),
     tableNumber: String(row.tableNumber),
-    start: formatDateTime(row.start),
-    end: formatDateTime(row.end),
-    status: Number(row.status) as OrderStatus,
+    start,
+    end,
+    status,
+    usedTime,
     createdAt: formatDateTime(row.createdAt) ?? '',
     updatedAt: formatDateTime(row.updatedAt) ?? '',
   }
@@ -104,10 +134,13 @@ async function maybeFinalizeOrderRow(row: any): Promise<Order> {
     const endDate = parseOrderDate(order.end)
     if (endDate && Date.now() > endDate.getTime()) {
       const now = normalizeDateTime(new Date().toISOString()) || formatDateTime(new Date()) || ''
-      await execute('UPDATE orders SET status = ?, updatedAt = ? WHERE id = ?', [1, now, order.id])
+      // 归档为已结束时，把已使用时间(end - start)持久化到数据库
+      const usedTime = formatUsedTime(order.start, order.end)
+      await execute('UPDATE orders SET status = ?, usedTime = ?, updatedAt = ? WHERE id = ?', [1, usedTime, now, order.id])
       return {
         ...order,
         status: 1,
+        usedTime,
         updatedAt: now,
       }
     }
@@ -139,9 +172,10 @@ export async function createOrder(payload: Partial<Order>, openid: string = 'unk
   const status = typeof payload.status === 'number' && [0, 1, 2, 3].includes(payload.status)
     ? payload.status
     : computeOrderStatus(payload.start ?? null, payload.end ?? null)
+  const usedTime = formatUsedTime(start, end)
   const result = await execute(
-    'INSERT INTO orders (tableId, tableNumber, start, end, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [payload.tableId ?? 0, payload.tableNumber ?? String(payload.tableId ?? ''), start, end, status, now, now]
+    'INSERT INTO orders (tableId, tableNumber, start, end, status, usedTime, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [payload.tableId ?? 0, payload.tableNumber ?? String(payload.tableId ?? ''), start, end, status, usedTime, now, now]
   )
   const insertId = Number((result as any).insertId)
   await createAuditLog({
@@ -175,6 +209,11 @@ export async function updateOrderById(orderId: number, payload: OrderUpdatePaylo
     params.push(payload.status)
   }
   if (updates.length === 0) return order
+  const nextStart = payload.start !== undefined ? normalizeDateTime(payload.start) : order.start
+  const nextEnd = payload.end !== undefined ? normalizeDateTime(payload.end) : order.end
+  const usedTime = formatUsedTime(nextStart, nextEnd)
+  updates.push('usedTime = ?')
+  params.push(usedTime)
   const updatedAt = normalizeDateTime(new Date().toISOString())
   updates.push('updatedAt = ?')
   params.push(updatedAt)

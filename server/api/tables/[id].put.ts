@@ -1,5 +1,6 @@
 import { updateTable } from '../../utils/tables'
-import { getHeader, requireAdmin } from '../../utils/auth'
+import { requireAdmin } from '../../utils/auth'
+import { getHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const method = event.node?.req?.method || event.req?.method

@@ -25,7 +25,7 @@
     >
       <view style="font-size:28rpx;font-weight:600;">订单 #{{item.id}}</view>
       <view style="margin-top:8rpx;color:#475569;font-size:24rpx;">桌号：{{item.tableNumber}}</view>
-      <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">创建时间：{{item.createdAt}}</view>
+      <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">已使用时间：{{item.usedTime || '0分钟'}}</view>
       <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">开始时间：{{item.start || '未设置'}}</view>
       <view style="margin-top:6rpx;color:#475569;font-size:24rpx;">结束时间：{{item.end || '未设置'}}</view>
       <view style="margin-top:6rpx;color:#2563eb;font-size:24rpx;">订单状态：{{item.statusLabel}}</view>

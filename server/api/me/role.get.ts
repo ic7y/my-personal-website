@@ -1,4 +1,5 @@
-import { getCurrentUserRole, getHeader } from '../../utils/auth'
+import { getCurrentUserRole } from '../../utils/auth'
+import { getHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const role = getCurrentUserRole(event)

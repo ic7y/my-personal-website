@@ -33,12 +33,18 @@ export async function ensureDbInitialized() {
       start DATETIME NULL,
       end DATETIME NULL,
       status TINYINT NOT NULL,
+      usedTime VARCHAR(64) NOT NULL DEFAULT '0分钟',
       createdAt DATETIME NOT NULL,
       updatedAt DATETIME NOT NULL,
       INDEX idx_tableId (tableId),
       CONSTRAINT fk_order_table FOREIGN KEY (tableId) REFERENCES tables(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `)
+  try {
+    await pool.query('ALTER TABLE orders ADD COLUMN usedTime VARCHAR(64) NOT NULL DEFAULT "0分钟"')
+  } catch (e) {
+    // ignore if column already exists
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS audit_logs (
       id INT PRIMARY KEY AUTO_INCREMENT,

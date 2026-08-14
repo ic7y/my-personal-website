@@ -1,7 +1,4 @@
-export function getHeader(event: any, name: string): string | undefined {
-  return (event.node?.req?.headers[name] || event.req?.headers[name]) as string | undefined
-}
-
+import { getHeader } from 'h3'
 
 const adminOpenIds=['wx_0f1iPh200VnmSW1IbC2009PrIl0iPh2I', 'admin002']
 

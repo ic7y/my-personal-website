@@ -1,5 +1,6 @@
 import { getAllTables } from '../utils/tables'
-import { getCurrentUserRole, getHeader } from '../utils/auth'
+import { getCurrentUserRole } from '../utils/auth'
+import { getHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const method = event.node?.req?.method || event.req?.method
