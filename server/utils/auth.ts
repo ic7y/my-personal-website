@@ -1,6 +1,6 @@
 import { getHeader } from 'h3'
 
-const adminOpenIds=['wx_0f1iPh200VnmSW1IbC2009PrIl0iPh2I', 'admin002']
+const adminOpenIds=['wx_0f1r7T000tKsUW1n4d100EP0h90r7T0-','wx_0f1iPh200VnmSW1IbC2009PrIl0iPh2I', 'admin002']
 
 function isAdminOpenId(openid?: string): boolean {
   const normalized = String(openid || '').trim()
