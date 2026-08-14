@@ -188,10 +188,10 @@ export async function updateTable(id: string | number, payload: TableUpdatePaylo
         tableId: Number(id),
         tableNumber,
         start: payload.start,
-        end: null,
+        end: payload.end ?? null,
         status: 2,
       }, openid)
-      changes.push(`create order start=${payload.start} status=2`)
+      changes.push(`create order start=${payload.start} end=${payload.end ?? null} status=2`)
     }
   } else if (currentOrder.status === 2) {
     // 进行中订单：允许直接修改开始/结束时间
