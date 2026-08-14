@@ -24,6 +24,10 @@
       <button class="action-btn action-btn--ghost" bindtap="goOrderHistory">历史订单</button>
       <button class="action-btn action-btn--ghost" bindtap="switchToUserMode">普通用户</button>
     </view>
+    <!-- 非管理员：登录 / 身份确认入口（手机端无缓存或缓存非管理员时，可重新登录获取管理员身份） -->
+    <view wx:if="{{role !== 'admin'}}" style="display:flex;align-items:center;gap:16rpx;margin-top:20rpx;">
+      <button class="action-btn action-btn--primary" bindtap="authorizeLogin" style="flex:1;">登录 / 身份确认</button>
+    </view>
     <!-- 调试信息面板 -->
     <view style="margin-top:16rpx;padding:16rpx 20rpx;background:#f8fafc;border-radius:16rpx;font-size:20rpx;color:#64748b;line-height:1.7;word-break:break-all;">
       <view>openid：{{openid}}</view>
