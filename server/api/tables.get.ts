@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   console.log('[api] GET /api/tables request', { method, headers })
   // Allow all users to view the tables list
   const tables = await getAllTables()
-  const role = getCurrentUserRole(event)
+  const role = await getCurrentUserRole(event)
   const openid = getHeader(event, 'x-openid') || ''
   const unionid = getHeader(event, 'x-unionid') || ''
   const result = { ok: true, data: tables, role, openid, unionid }

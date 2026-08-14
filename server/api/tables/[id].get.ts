@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 404)
     return { ok: false, message: 'table not found' }
   }
-  const role = getCurrentUserRole(event)
+  const role = await getCurrentUserRole(event)
   const openid = getHeader(event, 'x-openid') || ''
   const unionid = getHeader(event, 'x-unionid') || ''
   return { ok: true, data: table, role, openid, unionid }

@@ -59,6 +59,34 @@ export async function ensureDbInitialized() {
       INDEX idx_target (target)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `)
+  // 动态管理员 openid 表（含昵称）
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS admins (
+      openid VARCHAR(255) PRIMARY KEY,
+      nickname VARCHAR(255) NOT NULL DEFAULT '',
+      createdAt DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `)
+  // 兼容旧表：补充 nickname 列
+  try {
+    await pool.query('ALTER TABLE admins ADD COLUMN nickname VARCHAR(255) NOT NULL DEFAULT ""')
+  } catch (e) {
+    // 列已存在则忽略
+  }
+  // 迁移：将原硬编码管理员 openid 写入数据库，保证现有管理员不丢失
+  const legacyAdminOpenIds = [
+    'wx_0b1eNQ0w3clSz73Wja1w3JzchP0eNQ0-',
+    'wx_0f1r7T000tKsUW1n4d100EP0h90r7T0-',
+    'wx_0f1iPh200VnmSW1IbC2009PrIl0iPh2I',
+    'admin002'
+  ]
+  for (const oid of legacyAdminOpenIds) {
+    try {
+      await pool.query('INSERT IGNORE INTO admins (openid, nickname, createdAt) VALUES (?, "", NOW())', [oid])
+    } catch (e) {
+      // 忽略单条失败
+    }
+  }
   initialized = true
 }
 

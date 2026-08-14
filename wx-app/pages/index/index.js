@@ -34,7 +34,12 @@ Page({
     editModalVisible: false,
     editTableId: null,
     editStart: null,
-    editEnd: null
+    editEnd: null,
+    // 时间选择器（multiSelector）：年/月/日/时/分 五列
+    startPickerColumns: [],
+    startPickerIndex: [0, 0, 0, 0, 0],
+    endPickerColumns: [],
+    endPickerIndex: [0, 0, 0, 0, 0]
   },
 
 
@@ -501,6 +506,53 @@ Page({
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
   },
 
+  // ===== 年月日时分 多列选择器辅助 =====
+  daysInMonth(year, month) {
+    return new Date(year, month, 0).getDate()
+  },
+
+  buildTimeColumns(date) {
+    const y = date.getFullYear()
+    const years = []
+    for (let i = y - 5; i <= y + 5; i++) years.push(i)
+    const months = []
+    for (let m = 1; m <= 12; m++) months.push(m)
+    const days = []
+    for (let d = 1; d <= this.daysInMonth(y, date.getMonth() + 1); d++) days.push(d)
+    const hours = []
+    for (let h = 0; h < 24; h++) hours.push(h)
+    const minutes = []
+    for (let m = 0; m < 60; m++) minutes.push(m)
+    return [years, months, days, hours, minutes]
+  },
+
+  timeToIndex(date, columns) {
+    const vals = [
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes()
+    ]
+    return vals.map((v, i) => {
+      const idx = columns[i].indexOf(v)
+      return idx < 0 ? 0 : idx
+    })
+  },
+
+  indexToTime(index, columns) {
+    const pad = (n) => n < 10 ? `0${n}` : `${n}`
+    const [yi, mi, di, hi, mini] = index
+    return `${columns[0][yi]}-${pad(columns[1][mi])}-${pad(columns[2][di])} ${pad(columns[3][hi])}:${pad(columns[4][mini])}`
+  },
+
+  initPicker(value) {
+    const date = value ? new Date(String(value).replace(' ', 'T')) : new Date()
+    const columns = this.buildTimeColumns(date)
+    const index = this.timeToIndex(date, columns)
+    return { columns, index }
+  },
+
 // 时间修改弹窗
 openEditModal(e) {
   // 1. 权限控制：非管理员直接拦截（普通用户模式静默返回，不出现提示）
@@ -531,11 +583,18 @@ openEditModal(e) {
   // 进行中订单若已设置结束时间则预填
   const defaultEnd = table.currentOrder?.end ? this.toPickerValue(table.currentOrder.end) : ''
 
+  const startPicker = this.initPicker(defaultStart)
+  const endPicker = this.initPicker(defaultEnd)
+
   this.setData({
     editModalVisible: true,
     editTableId: tableId,
     editStart: defaultStart,
-    editEnd: defaultEnd
+    editEnd: defaultEnd,
+    startPickerColumns: startPicker.columns,
+    startPickerIndex: startPicker.index,
+    endPickerColumns: endPicker.columns,
+    endPickerIndex: endPicker.index
   });
 },
 
@@ -703,14 +762,56 @@ async updateOrderStatus(tableId, status) {
     }
   },
 
-  onEditStartChange(e) {
-    const v = e.detail.value
-    this.setData({ editStart: v })
+  // 滚动某列时更新索引（年月变化时重建天数列）
+  onStartColumnChange(e) {
+    const { column, value } = e.detail
+    const index = [...this.data.startPickerIndex]
+    index[column] = value
+    let columns = this.data.startPickerColumns
+    if (column === 0 || column === 1) {
+      const year = columns[0][index[0]]
+      const month = columns[1][index[1]]
+      const days = []
+      for (let d = 1; d <= this.daysInMonth(year, month); d++) days.push(d)
+      index[2] = Math.min(index[2], days.length - 1)
+      columns = [...columns]
+      columns[2] = days
+    }
+    this.setData({ startPickerColumns: columns, startPickerIndex: index })
   },
 
-  onEditEndChange(e) {
-    const v = e.detail.value
-    this.setData({ editEnd: v })
+  // 点击确定时回填 editStart
+  onStartPickerChange(e) {
+    const index = e.detail.value
+    this.setData({
+      startPickerIndex: index,
+      editStart: this.indexToTime(index, this.data.startPickerColumns)
+    })
+  },
+
+  onEndColumnChange(e) {
+    const { column, value } = e.detail
+    const index = [...this.data.endPickerIndex]
+    index[column] = value
+    let columns = this.data.endPickerColumns
+    if (column === 0 || column === 1) {
+      const year = columns[0][index[0]]
+      const month = columns[1][index[1]]
+      const days = []
+      for (let d = 1; d <= this.daysInMonth(year, month); d++) days.push(d)
+      index[2] = Math.min(index[2], days.length - 1)
+      columns = [...columns]
+      columns[2] = days
+    }
+    this.setData({ endPickerColumns: columns, endPickerIndex: index })
+  },
+
+  onEndPickerChange(e) {
+    const index = e.detail.value
+    this.setData({
+      endPickerIndex: index,
+      editEnd: this.indexToTime(index, this.data.endPickerColumns)
+    })
   },
 
   async saveEdit() {
@@ -720,6 +821,15 @@ async updateOrderStatus(tableId, status) {
     if (!start) {
       wx.showToast({ title: '请先选择开始时间', icon: 'none' })
       return
+    }
+    // 联动校验：开始时间不能晚于结束时间
+    if (end) {
+      const startMs = new Date(String(start).replace(' ', 'T')).getTime()
+      const endMs = new Date(String(end).replace(' ', 'T')).getTime()
+      if (!Number.isNaN(startMs) && !Number.isNaN(endMs) && startMs > endMs) {
+        wx.showToast({ title: '开始时间不能晚于结束时间', icon: 'none' })
+        return
+      }
     }
     const toIso = (value) => {
       if (!value) return null

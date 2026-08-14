@@ -53,7 +53,7 @@
         <!-- 卡片：去掉边框、外边距、内边距，宽度固定为50% -->
         <view style="width:50%; box-sizing:border-box; background:#fff;">
           <!-- 内部容器，仅保留内边距，确保内容不贴边 -->
-          <view style="padding:20rpx 16rpx; border-bottom:1px solid #f0f0f0; <!-- 若不需要分割线可移除 -->">
+          <view style="padding:20rpx 16rpx; border-bottom:1px solid #f0f0f0; ">
             
             <!-- 第一行：桌号（独占一行） -->
             <view style="font-size:34rpx; font-weight:600; color:#0f172a; padding-bottom:6rpx;">
@@ -126,13 +126,21 @@
   <view style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;justify-content:center;align-items:center;padding:20rpx;z-index:10000;">
     <view style="width:92%;background:#fff;border-radius:16rpx;padding:20rpx;">
       <view style="font-size:28rpx;font-weight:600;margin-bottom:12rpx;">修改桌台时间</view>
+      <!-- 开始时间：年月日 时分 多列选择控件 -->
       <view style="margin-top:8rpx;font-size:24rpx;color:#334155;">开始时间</view>
-      <picker mode="dateTime" value="{{editStart}}" bindchange="onEditStartChange">
-        <view style="margin-top:8rpx;padding:12rpx;border:1px solid #e6e9ef;border-radius:8rpx;">{{editStart || '请选择开始时间'}}</view>
+      <picker mode="multiSelector" value="{{startPickerIndex}}" range="{{startPickerColumns}}" bindcolumnchange="onStartColumnChange" bindchange="onStartPickerChange">
+        <view style="margin-top:8rpx;padding:20rpx 16rpx;border:1px solid #fcd9b3;background:#fff7ed;border-radius:12rpx;font-size:26rpx;color:#7c2d12;display:flex;align-items:center;justify-content:space-between;">
+          <text>{{editStart || '请选择开始时间'}}</text>
+          <text style="color:#f97316;font-size:22rpx;">选择 ›</text>
+        </view>
       </picker>
+      <!-- 结束时间：年月日 时分 多列选择控件（可不选） -->
       <view style="margin-top:12rpx;font-size:24rpx;color:#334155;">结束时间（可不选）</view>
-      <picker mode="dateTime" value="{{editEnd}}" bindchange="onEditEndChange">
-        <view style="margin-top:8rpx;padding:12rpx;border:1px solid #e6e9ef;border-radius:8rpx;">{{editEnd || '请选择结束时间（可留空）'}}</view>
+      <picker mode="multiSelector" value="{{endPickerIndex}}" range="{{endPickerColumns}}" bindcolumnchange="onEndColumnChange" bindchange="onEndPickerChange">
+        <view style="margin-top:8rpx;padding:20rpx 16rpx;border:1px solid #fcd9b3;background:#fff7ed;border-radius:12rpx;font-size:26rpx;color:#7c2d12;display:flex;align-items:center;justify-content:space-between;">
+          <text>{{editEnd || '请选择结束时间（可留空）'}}</text>
+          <text style="color:#f97316;font-size:22rpx;">选择 ›</text>
+        </view>
       </picker>
       <view style="display:flex;justify-content:flex-end;gap:12rpx;margin-top:16rpx;">
         <button type="default" bindtap="cancelEdit">取消</button>
