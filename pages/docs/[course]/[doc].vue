@@ -13,7 +13,6 @@
         </ul>
       </nav>
     </aside>
-
     <section class="docs-content">
       <div class="doc-header">
         <h1>{{ doc.title }}</h1>
@@ -32,8 +31,8 @@ import { getCourse, getDoc } from '../../../utils/docs'
 const route = useRoute()
 const courseKey = route.params.course as string
 const docKey = route.params.doc as string
-const course = getCourse(courseKey)
 
+const course = getCourse(courseKey)
 if (!course) {
   throw createError({ statusCode: 404, statusMessage: '未找到课程' })
 }
@@ -43,18 +42,20 @@ if (!doc) {
   throw createError({ statusCode: 404, statusMessage: '未找到文档' })
 }
 
-const rawMarkdown = ref('')
+// ========== 改动1：变量名通用化，兼容 md/html ==========
+const rawContent = ref('')
+
+// 判断当前是否为 HTML 文档
+const isHtml = computed(() => doc.file.toLowerCase().endsWith('.html'))
 
 const docDir = doc.file.includes('/') ? doc.file.replace(/\/[^/]*$/, '') : ''
 
 const resolveRelativeToDoc = (href = '') => {
   if (!href) return href
   if (/^(?:https?:\/\/|\/|#)/.test(href)) return href
-
   const docParts = docDir ? docDir.split('/').filter(Boolean) : []
   const hrefParts = href.split('/').filter(Boolean)
-  // Support Markdown that accidentally repeats the current doc directory prefix
-  // or includes an extra leading "docs" segment (e.g. './docs/competitions/..').
+
   if (hrefParts[0] === 'docs') {
     hrefParts.shift()
   }
@@ -63,36 +64,32 @@ const resolveRelativeToDoc = (href = '') => {
   }
 
   const stack = [...docParts]
-
   for (const part of hrefParts) {
     if (part === '.') continue
     if (part === '..') stack.pop()
     else stack.push(part)
   }
-
   return '/docs/' + stack.join('/')
 }
 
-const normalizeDocsUrls = (markdown = '') => {
-  // 1) Markdown links/images: ![alt](path) or [link](path)
-  markdown = markdown.replace(/(!?\[[^\]]*\]\()([^)"]+)(\))/g, (m, prefix, url, suffix) => {
+const normalizeDocsUrls = (content = '') => {
+  // 1) Markdown 链接/图片
+  content = content.replace(/(!?\[[^\]]*\]\()([^)"]+)(\))/g, (m, prefix, url, suffix) => {
     const clean = url.trim()
     if (/^(?:https?:\/\/|\/|#)/.test(clean)) return m
     return `${prefix}${resolveRelativeToDoc(clean)}${suffix}`
   })
-
-  // 2) HTML attributes like src="..." or poster='...'
-  markdown = markdown.replace(/(\b(?:src|poster|href)=["'])([^"']+)(["'])/g, (m, p1, url, p3) => {
+  // 2) HTML 属性（src/href/poster），同时适配 md 内嵌 html 和纯 html 文件
+  content = content.replace(/(\b(?:src|poster|href)=["'])([^"']+)(["'])/g, (m, p1, url, p3) => {
     const clean = url.trim()
     if (/^(?:https?:\/\/|\/|#)/.test(clean)) return m
     return `${p1}${resolveRelativeToDoc(clean)}${p3}`
   })
-
-  return markdown
+  return content
 }
 
 onMounted(async () => {
-  // Inject high-priority heading styles at runtime to override other global rules
+  // 注入标题样式覆盖，保留原有逻辑
   if (typeof window !== 'undefined') {
     const existing = document.getElementById('doc-heading-overrides')
     if (!existing) {
@@ -110,18 +107,32 @@ onMounted(async () => {
 
   const res = await $fetch(`/docs/${doc.file}`)
   const source = typeof res === 'string' ? res : String(res)
-  rawMarkdown.value = normalizeDocsUrls(source)
+  // 统一做路径归一化，md 和 html 都生效
+  rawContent.value = normalizeDocsUrls(source)
 })
 
+// ========== 改动2：按格式区分渲染逻辑 + 开启换行 ==========
 const htmlContent = computed(() => {
-  if (!rawMarkdown.value) {
+  if (!rawContent.value) {
     return '<p>正在加载文档...</p>'
   }
-  return marked.parse(rawMarkdown.value)
+
+  // HTML 文件直接返回原始内容
+  if (isHtml.value) {
+    return rawContent.value
+  }
+
+  // Markdown 文件解析，开启单回车换行 + GFM 语法
+  marked.setOptions({
+    breaks: true,
+    gfm: true
+  })
+  return marked.parse(rawContent.value)
 })
 </script>
 
 <style>
+/* 原有样式全部保留，无任何修改 */
 .docs-page-layout {
   display: grid;
   grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
@@ -310,3 +321,4 @@ const htmlContent = computed(() => {
   }
 }
 </style>
+
