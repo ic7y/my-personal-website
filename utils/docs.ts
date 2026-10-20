@@ -18,18 +18,17 @@ export const docsCourses: CourseItem[] = [
     title: '互联网公司职场之路',
     description: '浏览企业职业发展、求职经验和职场规划文档。',
     docs: [
-      { key: 'company-road', title: '互联网公司职场之路', file: 'company-road/company-road.md' }
+      { key: 'company-road', title: '互联网公司职场之路', file: 'company-road/company-road.md' },
+      { key: 'phy-pretest', title: '中考摸底', file: 'company-road/phy-pretest.md' },
+      { key: 'physics', title: '高一物理', file: 'company-road/physics.md' }
     ]
   },
-  {
-    key: 'bigdata-apply',
+  {  key: 'bigdata-apply',
     title: '大数据技术及应用',
     description: '大数据技术课程材料与作业说明。',
     docs: [
       { key: 'bigdata-analysis', title: '项目大作业说明', file: 'bigdata-apply/bigdata-analysis.md' },
-      
       { key: 'bigdata-ana-1', title: '项目大作业工程', file: 'bigdata-apply/bigdata-ana-1.md' },
-      
     ]
   },
   {
@@ -79,7 +78,8 @@ export const docsCourses: CourseItem[] = [
     title: '比赛',
     description: '竞赛相关资料与心得。',
     docs: [
-      { key: 'competitions', title: '比赛', file: 'competitions/competitions.md' }
+      { key: 'competitions', title: '比赛', file: 'competitions/competitions.md' },
+      { key: 'lanqiao', title: '蓝桥杯C/C++冲刺', file: 'competitions/freshman-CAndC++.html' },
     ]
   }
 ]
