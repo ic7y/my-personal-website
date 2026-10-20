@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蓝桥杯备战学习计划 - 海南省冲刺省级三等奖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        /* 顶部横幅 */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.8em;
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            letter-spacing: 2px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
+        }
+
+        .hero .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            color: #fff;
+            margin-top: 15px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.6em;
+            color: #a78bfa;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(167, 139, 250, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 .icon {
+            font-size: 1.2em;
+        }
+
+        .card h3 {
+            font-size: 1.2em;
+            color: #c4b5fd;
+            margin: 20px 0 12px 0;
+        }
+
+        /* 链接样式 */
+        .link-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 12px 0;
+        }
+
+        .link-box a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .link-box a:hover {
+            color: #a78bfa;
+            text-decoration: underline;
+        }
+
+        .link-box p {
+            margin-bottom: 6px;
+            color: #c4b5fd;
+        }
+
+        .link-box .url {
+            color: #7dd3fc;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        /* 列表样式 */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            padding: 8px 0 8px 25px;
+            position: relative;
+        }
+
+        ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #a78bfa;
+            font-size: 1.2em;
+        }
+
+        /* 表格样式 */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.15);
+            color: #c4b5fd;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tag.highlight {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        /* 提示框 */
+        .tip {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin: 15px 0;
+        }
+
+        .tip p {
+            color: #fde68a;
+            margin: 0;
+        }
+
+        /* 重点文字 */
+        strong {
+            color: #fbbf24;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9em;
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+            .card {
+                padding: 25px 20px;
+            }
+            .container {
+                padding: 25px 15px;
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(167, 139, 250, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部横幅 -->
+    <div class="hero">
+        <div class="hero-content">
+            <h1>&#9733; 蓝桥杯备战学习计划</h1>
+            <p class="subtitle">大一学生 &middot; C++ / C 方向 &middot; 海南省冲刺省级三等奖</p>
+            <div class="badge">&#128203; 目标：海南赛区省三 &middot; 4个月系统备战</div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- 目标拆解 -->
+        <div class="card">
+            <h2><span class="icon">&#127919;</span> 目标拆解（海南省赛区）</h2>
+            <p>海南赛区竞争压力相对较小，省三通常不需要高分。蓝桥杯省赛没有固定分数线，奖项按参赛人数比例划定，同时还会设最低获奖分数线。2026年起省赛奖项比例可能调整为 <strong>一等奖10%、二等奖15%、三等奖25%</strong>，总获奖率不超过50%。所以不要只盯着"30%"这个旧比例，更稳妥的目标是：<strong>稳定拿到前40%左右，并保证不是零分。</strong></p>
+            <p style="margin-top:12px;">只要保证不做零分卷，做对1道填空题，并在1-2道编程题里拿到部分测试点，就有较大机会获得省三。若前3道编程题发挥稳定，甚至可以冲省二。</p>
+
+            <div class="table-wrapper" style="margin-top:18px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>目标</th>
+                            <th>具体做法</th>
+                            <th>得分参考</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>保底不零分</strong></td>
+                            <td>每道题都提交，哪怕暴力枚举</td>
+                            <td>避免直接出局</td>
+                        </tr>
+                        <tr>
+                            <td><strong>填空题拿1道</strong></td>
+                            <td>枚举、日期计算、简单模拟</td>
+                            <td>10-15 分</td>
+                        </tr>
+                        <tr>
+                            <td><strong>编程题拿1-2道部分分</strong></td>
+                            <td>暴力、模拟、排序、贪心</td>
+                            <td>20-30 分</td>
+                        </tr>
+                        <tr>
+                            <td><strong>冲省二</strong></td>
+                            <td>前3道编程题尽量做稳</td>
+                            <td>40 分以上</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>&#128214; 推荐刷题资源</h3>
+
+            <div class="link-box">
+                <p>&#128214; <strong>洛谷真题库（入门难度）</strong> &mdash; 适合打基础，从 A+B Problem 到 NOIP 真题，循序渐进</p>
+                <span class="url">https://www.luogu.com.cn/problem/list?type=P&amp;page=1&amp;difficulty=1</span>
+            </div>
+
+            <div class="link-box">
+                <p>&#128214; <strong>蓝桥杯真题库</strong> &mdash; 官方真题卷，覆盖各届省赛/国赛、各大学组别，考前必刷</p>
+                <span class="url">https://www.lanqiao.cn/paper/</span>
+            </div>
+        </div>
+
+        <!-- 赛制与核心策略 -->
+        <div class="card">
+            <h2><span class="icon">&#9876;</span> 赛制与核心策略</h2>
+            <p>省赛一般 <strong>4 小时</strong>，<strong>10 道题</strong>：5 道结果填空 + 5 道编程题。</p>
+            <p>冲刺省三的核心不是"全会"，而是：</p>
+            <ul>
+                <li>填空题尽量做对 1-2 道；</li>
+                <li>编程题前 2-3 道争取拿满或接近满分；</li>
+                <li>后面难题用暴力、模拟、枚举骗分；</li>
+                <li>避免零分卷，零分不得奖。</li>
+            </ul>
+        </div>
+
+        <!-- 四个月学习计划 -->
+        <div class="card">
+            <h2><span class="icon">&#128197;</span> 四个月学习计划（海南赛区版）</h2>
+            <p>现在到明年4月省赛，时间比较合适。以下计划针对海南赛区特点定制，重点放在"稳拿基础分 + 骗分策略"上。</p>
+
+            <h3>&#128161; 第 1-4 周：语法 + 基础题感</h3>
+            <ul>
+                <li><strong>目标：</strong>能独立写循环、数组、字符串、结构体。</li>
+                <li>C++ 选手补 STL：vector、string、sort、queue。</li>
+                <li>每天 1.5-2 小时，周末 4-6 小时。</li>
+                <li>刷题：洛谷入门题 + 蓝桥杯练习系统基础题。</li>
+            </ul>
+
+            <h3>&#128161; 第 5-8 周：枚举、模拟、排序、二分、前缀和</h3>
+            <ul>
+                <li><strong>目标：</strong>能稳定拿下填空题和前两道编程题。</li>
+                <li>重点练：日期题、暴力枚举、字符串处理、简单贪心。</li>
+                <li>每周 15-20 题，按专题刷。</li>
+            </ul>
+
+            <h3>&#128161; 第 9-12 周：DFS/BFS、基础 DP、简单数论</h3>
+            <ul>
+                <li><strong>目标：</strong>提高编程题拿分上限。</li>
+                <li>重点：连通块、迷宫、背包、线性 DP、GCD、素数、快速幂。</li>
+                <li>每周 12-18 题，整理模板。</li>
+            </ul>
+
+            <h3>&#128161; 第 13-16 周：真题模拟 + 骗分训练</h3>
+            <ul>
+                <li><strong>目标：</strong>适应 4 小时比赛节奏。</li>
+                <li>每周做 2-3 套真题，严格限时。</li>
+                <li>每套复盘：哪些题能拿满，哪些题能骗分，哪些题该放弃。</li>
+            </ul>
+
+            <div class="table-wrapper" style="margin-top:18px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>重点</th>
+                            <th>每周任务</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>第1-4周<br>语法基础</strong></td>
+                            <td>C/C++ 输入输出、循环、数组、字符串、函数、结构体；C++ 选手补 STL</td>
+                            <td>每天 1-2 小时，刷洛谷入门题 10-15 道</td>
+                        </tr>
+                        <tr>
+                            <td><strong>第5-8周<br>基础算法</strong></td>
+                            <td>枚举、模拟、排序、二分、前缀和、简单贪心、日期计算</td>
+                            <td>每周 15-20 题，按专题刷</td>
+                        </tr>
+                        <tr>
+                            <td><strong>第9-12周<br>核心拿分算法</strong></td>
+                            <td>DFS/BFS、基础 DP、背包、简单图论、并查集、数论基础</td>
+                            <td>每周 12-18 题，整理模板</td>
+                        </tr>
+                        <tr>
+                            <td><strong>第13-16周<br>真题冲刺</strong></td>
+                            <td>近 5 年省赛真题，限时 4 小时模拟</td>
+                            <td>每周 2-3 套，复盘错题</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 每周时间建议 -->
+        <div class="card">
+            <h2><span class="icon">&#128336;</span> 每周时间建议</h2>
+            <ul>
+                <li><strong>平时：</strong>每天 1.5-2 小时；</li>
+                <li><strong>周末：</strong>4-6 小时；</li>
+                <li>期末周适当减少刷题，但不能完全停；</li>
+                <li>不要只看书，一定要上机写代码。</li>
+            </ul>
+        </div>
+
+        <!-- 必须掌握的高频考点 -->
+        <div class="card">
+            <h2><span class="icon">&#128221;</span> 必须掌握的高频考点</h2>
+            <p>优先学这些，性价比最高：</p>
+            <div style="margin-top:12px;">
+                <span class="tag highlight">输入输出与基础语法</span>
+                <span class="tag">数组、字符串、结构体</span>
+                <span class="tag highlight">枚举与模拟</span>
+                <span class="tag">蓝桥杯非常常见</span>
+                <span class="tag highlight">排序与二分</span>
+                <span class="tag">快排、sort、二分答案</span>
+                <span class="tag highlight">前缀和、差分</span>
+                <span class="tag">区间求和类题常用</span>
+                <span class="tag highlight">DFS/BFS</span>
+                <span class="tag">迷宫、连通块、路径搜索</span>
+                <span class="tag highlight">基础 DP</span>
+                <span class="tag">线性 DP、01 背包、完全背包</span>
+                <span class="tag highlight">简单数论</span>
+                <span class="tag">GCD、LCM、素数判断、快速幂</span>
+                <span class="tag highlight">日期/时间处理</span>
+                <span class="tag">蓝桥杯高频题型</span>
+                <span class="tag highlight">STL</span>
+                <span class="tag">vector、string、queue、stack、map、set、sort</span>
+            </div>
+        </div>
+
+        <!-- 刷题平台 -->
+        <div class="card">
+            <h2><span class="icon">&#128736;</span> 刷题平台</h2>
+            <ul>
+                <li><strong>洛谷</strong>：按"入门""普及-"难度刷；</li>
+                <li><strong>蓝桥杯练习系统</strong>：熟悉真题和提交环境；</li>
+                <li><strong>AcWing</strong>：有蓝桥杯专项题和专题训练；</li>
+                <li>真题优先刷 <strong>C/C++ 大学 B 组</strong>，如果基础较弱可以先看 C 组题。</li>
+            </ul>
+        </div>
+
+        <!-- 考场策略 -->
+        <div class="card">
+            <h2><span class="icon">&#9878;</span> 考场策略</h2>
+            <ul>
+                <li>先做填空题，再从前到后做简单编程题；</li>
+                <li>编程题不要空着，暴力解也能拿测试点；</li>
+                <li>填空题答案格式必须严格一致；</li>
+                <li>注意 long long、数组越界、输入格式；</li>
+                <li>考前用 Dev-C++ 练几套题，避免考场环境不适应。</li>
+            </ul>
+
+            <div class="tip">
+                <p>&#9889; 建议优先选 <strong>C++ 大学 B 组</strong> 作为主方向；如果 C 语言更熟，也可以报 C，但训练时尽量按 C++ 思路准备模板。省三的关键不是难题全会，而是把简单题做稳、难题能骗到分。海南赛区竞争压力相对较小，稳住基础分就有很大机会获奖！</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>蓝桥杯备战学习计划 &middot; 海南省赛区版 &middot; 祝大家好运 &#127806;</p>
+    </div>
+
+</body>
+</html>
